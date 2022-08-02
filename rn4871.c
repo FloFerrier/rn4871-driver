@@ -32,8 +32,7 @@ static const char TABLE_COMMAND[][10] = {
 static bool _checkHexaIsCorrect(const char *hexa, size_t size);
 
 uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const char *format, ...) {
-    if(NULL == dev)
-        return CODE_RETURN_ERROR;
+    assert(NULL != dev);
 
     va_list args;
     if(NULL != format)
@@ -92,8 +91,7 @@ uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const cha
 }
 
 uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *pBuffer, uint16_t bufferSize) {
-    if((NULL == dev) || (NULL == pBuffer))
-		return CODE_RETURN_ERROR;
+    assert((NULL != dev) || (NULL != pBuffer));
 
 	(void)bufferSize;
 	uint8_t ret = CODE_RETURN_ERROR;
@@ -163,8 +161,7 @@ uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *pBuffer, uin
 }
 
 uint8_t rn4871SetConfig(struct rn4871_dev_s *dev) {
-    if(NULL == dev)
-        return CODE_RETURN_ERROR;
+    assert(NULL != dev);
 
     uint8_t pBuffer[BUFFER_UART_LEN_MAX+1] = "";
     uint16_t bufferSize = 0;
@@ -225,8 +222,7 @@ uint8_t rn4871SetConfig(struct rn4871_dev_s *dev) {
 }
 
 uint8_t rn4871TransparentUartSendData(struct rn4871_dev_s *dev, uint8_t *pBuffer, uint16_t bufferSize) {
-    if(NULL == dev || NULL == pBuffer)
-        return CODE_RETURN_ERROR;
+    assert((NULL != dev) || (NULL != pBuffer));
 
     if(false == dev->transparentUart)
         return CODE_RETURN_NO_TRANSPARENT_UART;
@@ -238,8 +234,7 @@ uint8_t rn4871TransparentUartSendData(struct rn4871_dev_s *dev, uint8_t *pBuffer
 }
 
 bool _checkHexaIsCorrect(const char *hexa, size_t size) {
-    if(NULL == hexa)
-        return false;
+    assert(NULL != hexa);
 
     if(size != strlen(hexa))
         return false;
@@ -253,8 +248,7 @@ bool _checkHexaIsCorrect(const char *hexa, size_t size) {
 }
 
 uint8_t _createCustomService(struct rn4871_dev_s *dev, struct service_param_s *service) {
-    if(NULL == dev || NULL == service)
-        return CODE_RETURN_ERROR;
+    assert((NULL != dev) || (NULL != service));
 
     if(true == dev->transparentUart)
         return CODE_RETURN_ERROR;
@@ -285,8 +279,7 @@ uint8_t _createCustomService(struct rn4871_dev_s *dev, struct service_param_s *s
 }
 
 uint8_t _createCustomChar(struct rn4871_dev_s *dev, struct char_param_s *characteristic) {
-    if(NULL == dev || NULL == characteristic)
-        return CODE_RETURN_ERROR;
+    assert((NULL != dev) || (NULL != characteristic));
 
     if(true == dev->transparentUart)
         return CODE_RETURN_ERROR;

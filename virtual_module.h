@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <assert.h>
 
 void uartRxVirtualModule(const uint8_t *pInput, const uint16_t inputSize);
 void uartTxVirtualModule(uint8_t *pOutput, uint16_t *outputSize);

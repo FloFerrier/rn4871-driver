@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include <stdarg.h>
 #include <ctype.h>
+#include <assert.h>
 
 #include "rn4871_defs.h"
 #include "gatt.h"

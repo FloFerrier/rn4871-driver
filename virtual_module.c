@@ -33,13 +33,13 @@ char pGlobalBuffer[BUFFER_MAX_LEN+1] = "";
 static bool _checkHexaIsCorrect(const char *hexa, size_t size);
 
 bool _checkHexaIsCorrect(const char *hexa, size_t size) {
-    if(NULL == hexa)
-        return false;
+    assert(NULL != hexa);
 
-    if(size != strlen(hexa))
+    if(size != strlen(hexa)) {
         return false;
+    }
 
-    /* Must contained only [A-F] or [0-9] characters */
+    /* Must contain only [A-F] or [0-9] characters */
     for(int idx=0; idx < size; idx++) {
         if(0 == isxdigit(hexa[idx]))
             return false;
@@ -48,10 +48,8 @@ bool _checkHexaIsCorrect(const char *hexa, size_t size) {
 }
 
 void uartRxVirtualModule(const uint8_t *pInput, const uint16_t inputSize) {
+    assert(NULL != pInput);
     memset(pGlobalBuffer, '\0', BUFFER_MAX_LEN);
-    if(NULL == pInput)
-        return;
-
     static uint8_t cnt_cmd_mode = 0;
     if(0 == strcmp(pInput, "$")) {
         ++cnt_cmd_mode;
@@ -176,8 +174,7 @@ void uartRxVirtualModule(const uint8_t *pInput, const uint16_t inputSize) {
 }
 
 void uartTxVirtualModule(uint8_t *pOutput, uint16_t *outputSize) {
-    if(NULL == pOutput || NULL == outputSize)
-        return;
+    assert((NULL != pOutput) || (NULL != outputSize));
     strncpy(pOutput, pGlobalBuffer, BUFFER_MAX_LEN);
     *outputSize = strnlen(pGlobalBuffer, BUFFER_MAX_LEN);
 }
