@@ -18,7 +18,7 @@ struct virtual_module_s {
     bool _commandMode;
     bool _transparentUart;
     char _bt_name[256];
-    char _module_name[256];
+    char _module_name[25];
 };
 
 struct virtual_module_s virtualModule = {
