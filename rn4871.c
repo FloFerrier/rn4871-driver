@@ -21,6 +21,7 @@ static const char TABLE_COMMAND[][10] = {
 };
 
 static bool _checkHexaIsCorrect(const char *hexa, size_t size);
+static void _parseResponse(const char *response, char *proceededResponse);
 
 uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const char *format, ...) {
     assert(NULL != dev);
@@ -81,11 +82,29 @@ uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const cha
 	return ret;
 }
 
+/* BUG !!!
+ * This function replace strtok_r that cause segmentation fault
+ */
+void _parseResponse(const char *response, char *proceededResponse) {
+    assert((NULL != response) || (NULL != proceededResponse));
+
+    int idx = 0;
+    for(int i=0; i<strlen(response); i++) {
+        if(('\r' == response[i]) || (' ' == response[i])) {
+            idx = i;
+            break;
+        }
+    }
+    strncpy(proceededResponse, response, idx);
+    proceededResponse[idx] = '\0';
+}
+
 uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *input, char *output) {
     assert((NULL != dev) || (NULL != input) || (NULL != output));
 
 	uint8_t ret = CODE_RETURN_ERROR;
     enum rn4871_cmd_e cmd = dev->_current_cmd;
+
     if((NULL != strstr(input, "CMD>")) || (NULL != strstr(input, "REBOOT"))) {
         dev->fsm_state = FSM_STATE_INIT;
 
@@ -94,9 +113,6 @@ uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *input, char 
             ret = CODE_RETURN_ERROR;
         /* Parse and get data from response */
         else {
-            char delimiter[] = "\r";
-            char *token;
-            char *saveptr;
             switch(cmd) {
                 case CMD_MODE_ENTER:
                 case CMD_MODE_QUIT:
@@ -112,29 +128,17 @@ uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *input, char 
                     break;
                 }
                 case CMD_DUMP_INFOS: {
-                    //printf("DEBUG [%ld]\"%s\"\r\n", strlen(input), (char*)input);
-                    //token = strtok_r((char*)input, delimiter, &saveptr);
-                    //printf("DEBUG %s\r\n", token);
-                    //strncpy(output, token, BUFFER_UART_LEN_MAX);
+                    _parseResponse(input, output);
                     ret = CODE_RETURN_SUCCESS;
                     break;
                 }
                 case CMD_GET_DEVICE_NAME: {
-                    //printf("DEBUG [%ld]\"%s\"\r\n", strlen(input), (char*)input);
-                    //token = strtok((char*)input, delimiter);
-                    //token = strtok_r(NULL, delimiter, &saveptr);
-                    //printf("DEBUG %s\r\n", token);
-                    //strncpy(output, token, BUFFER_UART_LEN_MAX);
-                    snprintf(output, BUFFER_UART_LEN_MAX, "RN4871-0790");
+                    _parseResponse(input, output);
                     ret = CODE_RETURN_SUCCESS;
                     break;
                 }
                 case CMD_GET_VERSION: {
-                    //printf("DEBUG [%ld]\"%s\"\r\n", strlen(input), (char*)input);
-                    //token = strtok_r((char*)input, delimiter, &saveptr);
-                    //printf("DEBUG %s\r\n", token);
-                    //strncpy(output, token, BUFFER_UART_LEN_MAX);
-                    snprintf(output, BUFFER_UART_LEN_MAX, "V1.40");
+                    _parseResponse(input, output);
                     ret = CODE_RETURN_SUCCESS;
                     break;
                 }
