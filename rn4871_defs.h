@@ -43,6 +43,13 @@ enum rn4871_fsm_e {
   FSM_STATE_HALT,
 };
 
+enum rn4871_service_e {
+  DEVICE_INFORMATION = 0x80,
+  UART_TRANSPARENT   = 0x40,
+  BEACON             = 0x20,
+  RESERVED           = 0x10,
+};
+
 typedef uint8_t (*rn4871_com_fptr_t)(uint8_t *pBuffer, uint16_t *bufferSize);
 typedef void (*rn4871_delay_fptr_t)(uint32_t delay);
 

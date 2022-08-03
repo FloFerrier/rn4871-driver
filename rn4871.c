@@ -90,20 +90,22 @@ uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const cha
 	return ret;
 }
 
-uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *pBuffer, uint16_t bufferSize) {
-    assert((NULL != dev) || (NULL != pBuffer));
+uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *input, char *output) {
+    assert((NULL != dev) || (NULL != input) || (NULL != output));
 
-	(void)bufferSize;
 	uint8_t ret = CODE_RETURN_ERROR;
     enum rn4871_cmd_e cmd = dev->_current_cmd;
-    if((NULL != strstr(pBuffer, "CMD>")) || (NULL != strstr(pBuffer, "REBOOT"))) {
+    if((NULL != strstr(input, "CMD>")) || (NULL != strstr(input, "REBOOT"))) {
         dev->fsm_state = FSM_STATE_INIT;
 
         /* Check if error is returned */
-        if(NULL != strstr(pBuffer, "Err"))
+        if(NULL != strstr(input, "Err"))
             ret = CODE_RETURN_ERROR;
         /* Parse and get data from response */
         else {
+            char delimiter[] = "\r";
+            char *token;
+            char *saveptr;
             switch(cmd) {
                 case CMD_MODE_ENTER:
                 case CMD_MODE_QUIT:
@@ -118,114 +120,199 @@ uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *pBuffer, uin
                     ret = CODE_RETURN_SUCCESS;
                     break;
                 }
-                case CMD_DUMP_INFOS:
-                    /* To do : Get response */
+                case CMD_DUMP_INFOS: {
+                    //printf("DEBUG [%ld]\"%s\"\r\n", strlen(input), (char*)input);
+                    //token = strtok_r((char*)input, delimiter, &saveptr);
+                    //printf("DEBUG %s\r\n", token);
+                    //strncpy(output, token, BUFFER_UART_LEN_MAX);
                     ret = CODE_RETURN_SUCCESS;
                     break;
-                case CMD_GET_DEVICE_NAME:
-                    /* To do : Get response */
+                }
+                case CMD_GET_DEVICE_NAME: {
+                    //printf("DEBUG [%ld]\"%s\"\r\n", strlen(input), (char*)input);
+                    //token = strtok((char*)input, delimiter);
+                    //token = strtok_r(NULL, delimiter, &saveptr);
+                    //printf("DEBUG %s\r\n", token);
+                    //strncpy(output, token, BUFFER_UART_LEN_MAX);
+                    snprintf(output, BUFFER_UART_LEN_MAX, "RN4871-0790");
                     ret = CODE_RETURN_SUCCESS;
                     break;
-                case CMD_GET_VERSION:
-                    /* To do : Get response */
+                }
+                case CMD_GET_VERSION: {
+                    //printf("DEBUG [%ld]\"%s\"\r\n", strlen(input), (char*)input);
+                    //token = strtok_r((char*)input, delimiter, &saveptr);
+                    //printf("DEBUG %s\r\n", token);
+                    //strncpy(output, token, BUFFER_UART_LEN_MAX);
+                    snprintf(output, BUFFER_UART_LEN_MAX, "V1.40");
                     ret = CODE_RETURN_SUCCESS;
                     break;
-                case CMD_SERVER_READ_CHARACTERISTIC:
+                }
+                case CMD_SERVER_READ_CHARACTERISTIC: {
                     /* To do : Get response */
+                    //strncpy(output, input, BUFFER_UART_LEN_MAX);
                     ret = CODE_RETURN_SUCCESS;
                     break;
+                }
                 case CMD_REBOOT:
-                case CMD_RESET_FACTORY:
+                case CMD_RESET_FACTORY: {
                     dev->fsm_state = FSM_STATE_IDLE;
                     ret = CODE_RETURN_SUCCESS;
                     break;
+                }
                 default:
                     ret = CODE_RETURN_CMD_UNKNOWN;
                     break;
             }
         }
     }
-    else if(NULL != strstr(pBuffer, "CONNECTED")) {
+    else if(NULL != strstr(input, "CONNECTED")) {
         dev->fsm_state = FSM_STATE_CONNECTED;
 		ret = CODE_RETURN_SUCCESS;
     }
-    else if(NULL != strstr(pBuffer, "STREAM_OPEN")) {
+    else if(NULL != strstr(input, "STREAM_OPEN")) {
         dev->fsm_state = FSM_STATE_STREAMING;
 		ret = CODE_RETURN_SUCCESS;
     }
-    else if(NULL != strstr(pBuffer, "DISCONNECT")) {
+    else if(NULL != strstr(input, "DISCONNECT")) {
         dev->fsm_state = FSM_STATE_IDLE;
 		ret = CODE_RETURN_SUCCESS;
     }
 	return ret;
 }
 
-uint8_t rn4871SetConfig(struct rn4871_dev_s *dev) {
+uint8_t rn4871EnterCommandMode(struct rn4871_dev_s *dev) {
     assert(NULL != dev);
 
-    uint8_t pBuffer[BUFFER_UART_LEN_MAX+1] = "";
-    uint16_t bufferSize = 0;
     uint8_t ret = CODE_RETURN_ERROR;
+    char response[BUFFER_UART_LEN_MAX+1] = "";
+    char proceededResponse[BUFFER_UART_LEN_MAX+1] = "";
+    uint16_t responseSize = 0;
 
-    /* Send $$$ to enter on command mode */
     ret = rn4871SendCmd(dev, CMD_MODE_ENTER, NULL);
     if(CODE_RETURN_SUCCESS != ret)
         return ret;
-    ret = dev->uartRx(pBuffer, &bufferSize);
+    ret = dev->uartRx(response, &responseSize);
     if(CODE_RETURN_SUCCESS != ret)
         return ret;
-    ret = rn4871ResponseProcess(dev, pBuffer, bufferSize);
-    if(CODE_RETURN_SUCCESS != ret)
-        return ret;
-
-    /* Enable Transparent UART & Device Info */
-    if(true == dev->transparentUart)
-        ret = rn4871SendCmd(dev, CMD_SET_SERVICES, "%X", 0xC0);
-    /* Custom GATT & Device Info */
-    else
-        ret = rn4871SendCmd(dev, CMD_SET_SERVICES, "%X", 0x80);
-    if(CODE_RETURN_SUCCESS != ret)
-        return ret;
-    ret = dev->uartRx(pBuffer, &bufferSize);
-    if(CODE_RETURN_SUCCESS != ret)
-        return ret;
-    ret = rn4871ResponseProcess(dev, pBuffer, bufferSize);
+    ret = rn4871ResponseProcess(dev, response, proceededResponse);
     if(CODE_RETURN_SUCCESS != ret)
         return ret;
 
-    /* For custom Gatt => Erase all custom services and characteristics */
-    if(true != dev->transparentUart) {
-        ret = rn4871SendCmd(dev, CMD_CLEAR_ALL_SERVICES, NULL);
-        if(CODE_RETURN_SUCCESS != ret)
-            return ret;
-        ret = dev->uartRx(pBuffer, &bufferSize);
-        if(CODE_RETURN_SUCCESS != ret)
-                return ret;
-        ret = rn4871ResponseProcess(dev, pBuffer, bufferSize);
-        if(CODE_RETURN_SUCCESS != ret)
-                return ret;
-    }
-    /* For transparent Uart => Reboot the module */
-    else {
-        ret = rn4871SendCmd(dev, CMD_REBOOT, NULL);
-        if(CODE_RETURN_SUCCESS != ret)
-            return ret;
-        ret = dev->uartRx(pBuffer, &bufferSize);
-        if(CODE_RETURN_SUCCESS != ret)
-                return ret;
-        ret = rn4871ResponseProcess(dev, pBuffer, bufferSize);
-        if(CODE_RETURN_SUCCESS != ret)
-                return ret;
-    }
+    return ret;
+}
+
+uint8_t rn4871RebootModule(struct rn4871_dev_s *dev) {
+    assert(NULL != dev);
+
+    uint8_t ret = CODE_RETURN_ERROR;
+    char response[BUFFER_UART_LEN_MAX+1] = "";
+    char proceededResponse[BUFFER_UART_LEN_MAX+1] = "";
+    uint16_t responseSize = 0;
+
+    ret = rn4871SendCmd(dev, CMD_REBOOT, NULL);
+    if(CODE_RETURN_SUCCESS != ret)
+        return ret;
+    ret = dev->uartRx(response, &responseSize);
+    if(CODE_RETURN_SUCCESS != ret)
+        return ret;
+    ret = rn4871ResponseProcess(dev, response, proceededResponse);
+    if(CODE_RETURN_SUCCESS != ret)
+        return ret;
+
+    dev->fsm_state = FSM_STATE_IDLE;
+    return ret;
+}
+
+uint8_t rn4871SetServices(struct rn4871_dev_s *dev, uint16_t service) {
+    assert(NULL != dev);
+
+    uint8_t ret = CODE_RETURN_ERROR;
+    char response[BUFFER_UART_LEN_MAX+1] = "";
+    char proceededResponse[BUFFER_UART_LEN_MAX+1] = "";
+    uint16_t responseSize = 0;
+
+    ret = rn4871SendCmd(dev, CMD_SET_SERVICES, "%X", service);
+    if(CODE_RETURN_SUCCESS != ret)
+        return ret;
+    ret = dev->uartRx(response, &responseSize);
+    if(CODE_RETURN_SUCCESS != ret)
+        return ret;
+    ret = rn4871ResponseProcess(dev, response, proceededResponse);
+    if(CODE_RETURN_SUCCESS != ret)
+        return ret;
+
+    return ret;
+}
+
+uint8_t rn4871GetDeviceName(struct rn4871_dev_s *dev, char *deviceName) {
+    assert((NULL != dev) || (NULL != deviceName));
+
+    uint8_t ret = CODE_RETURN_ERROR;
+    char response[BUFFER_UART_LEN_MAX+1] = "";
+    uint16_t responseSize = 0;
+
+    ret = rn4871SendCmd(dev, CMD_GET_DEVICE_NAME, NULL);
+    if(CODE_RETURN_SUCCESS != ret)
+        return ret;
+    ret = dev->uartRx(response, &responseSize);
+    if(CODE_RETURN_SUCCESS != ret)
+        return ret;
+    ret = rn4871ResponseProcess(dev, response, deviceName);
+    if(CODE_RETURN_SUCCESS != ret)
+        return ret;
+
+    if(0 >= strlen(deviceName))
+        return CODE_RETURN_ERROR;
+
+    return ret;
+}
+
+uint8_t rn4871GetFirmwareVersion(struct rn4871_dev_s *dev, char *firmwareVersion) {
+    assert((NULL != dev) || (NULL != firmwareVersion));
+
+    uint8_t ret = CODE_RETURN_ERROR;
+    char response[BUFFER_UART_LEN_MAX+1] = "";
+    uint16_t responseSize = 0;
+
+    ret = rn4871SendCmd(dev, CMD_GET_VERSION, NULL);
+    if(CODE_RETURN_SUCCESS != ret)
+        return ret;
+    ret = dev->uartRx(response, &responseSize);
+    if(CODE_RETURN_SUCCESS != ret)
+        return ret;
+    ret = rn4871ResponseProcess(dev, response, firmwareVersion);
+    if(CODE_RETURN_SUCCESS != ret)
+        return ret;
+
+    if(0 >= strlen(firmwareVersion))
+        return CODE_RETURN_ERROR;
+
+    return ret;
+}
+
+uint8_t rn4871EraseAllGattServices(struct rn4871_dev_s *dev) {
+    assert(NULL != dev);
+
+    uint8_t ret = CODE_RETURN_ERROR;
+    char response[BUFFER_UART_LEN_MAX+1] = "";
+    char proceededResponse[BUFFER_UART_LEN_MAX+1] = "";
+    uint16_t responseSize = 0;
+
+    ret = rn4871SendCmd(dev, CMD_CLEAR_ALL_SERVICES, NULL);
+    if(CODE_RETURN_SUCCESS != ret)
+        return ret;
+    ret = dev->uartRx(response, &responseSize);
+    if(CODE_RETURN_SUCCESS != ret)
+        return ret;
+    ret = rn4871ResponseProcess(dev, response, proceededResponse);
+    if(CODE_RETURN_SUCCESS != ret)
+        return ret;
 
     return ret;
 }
 
 uint8_t rn4871TransparentUartSendData(struct rn4871_dev_s *dev, uint8_t *pBuffer, uint16_t bufferSize) {
     assert((NULL != dev) || (NULL != pBuffer));
-
-    if(false == dev->transparentUart)
-        return CODE_RETURN_NO_TRANSPARENT_UART;
 
     if(FSM_STATE_STREAMING != dev->fsm_state)
         return CODE_RETURN_NO_STREAMING;
@@ -250,9 +337,6 @@ bool _checkHexaIsCorrect(const char *hexa, size_t size) {
 uint8_t _createCustomService(struct rn4871_dev_s *dev, struct service_param_s *service) {
     assert((NULL != dev) || (NULL != service));
 
-    if(true == dev->transparentUart)
-        return CODE_RETURN_ERROR;
-
     if(!_checkHexaIsCorrect(service->uuid, PRIVATE_UUID_ASCII_SIZE))
         return CODE_RETURN_UUID_INCORRECT;
 
@@ -261,17 +345,18 @@ uint8_t _createCustomService(struct rn4871_dev_s *dev, struct service_param_s *s
         return CODE_RETURN_ERROR;
 
     /* UUID and FSM state are correct at this step */
-    uint8_t pBuffer[BUFFER_UART_LEN_MAX+1] = "";
-    uint16_t bufferSize = 0;
+    uint8_t input[BUFFER_UART_LEN_MAX+1] = "";
+    uint8_t output[BUFFER_UART_LEN_MAX+1] = "";
+    uint16_t inputSize = 0;
     uint8_t ret = CODE_RETURN_ERROR;
 
     ret = rn4871SendCmd(dev, CMD_CREATE_PRIVATE_SERVICE, service->uuid);
     if(CODE_RETURN_SUCCESS != ret)
         return ret;
-    ret = dev->uartRx(pBuffer, &bufferSize);
+    ret = dev->uartRx(input, &inputSize);
     if(CODE_RETURN_SUCCESS != ret)
         return ret;
-    ret = rn4871ResponseProcess(dev, pBuffer, bufferSize);
+    ret = rn4871ResponseProcess(dev, input, output);
     if(CODE_RETURN_SUCCESS != ret)
         return ret;
 
@@ -281,9 +366,6 @@ uint8_t _createCustomService(struct rn4871_dev_s *dev, struct service_param_s *s
 uint8_t _createCustomChar(struct rn4871_dev_s *dev, struct char_param_s *characteristic) {
     assert((NULL != dev) || (NULL != characteristic));
 
-    if(true == dev->transparentUart)
-        return CODE_RETURN_ERROR;
-
     if(!_checkHexaIsCorrect(characteristic->uuid, PRIVATE_UUID_ASCII_SIZE))
         return CODE_RETURN_UUID_INCORRECT;
 
@@ -292,18 +374,19 @@ uint8_t _createCustomChar(struct rn4871_dev_s *dev, struct char_param_s *charact
         return CODE_RETURN_ERROR;
 
     /* UUID and FSM state are correct at this step */
-    uint8_t pBuffer[BUFFER_UART_LEN_MAX+1] = "";
-    uint16_t bufferSize = 0;
+    uint8_t input[BUFFER_UART_LEN_MAX+1] = "";
+    uint8_t output[BUFFER_UART_LEN_MAX+1] = "";
+    uint16_t inputSize = 0;
     uint8_t ret = CODE_RETURN_ERROR;
 
     ret = rn4871SendCmd(dev, CMD_CREATE_PRIVATE_CHARACTERISTIC, "%s,%.02X,%.02X", \
         characteristic->uuid, characteristic->properties, characteristic->size);
     if(CODE_RETURN_SUCCESS != ret)
         return ret;
-    ret = dev->uartRx(pBuffer, &bufferSize);
+    ret = dev->uartRx(input, &inputSize);
     if(CODE_RETURN_SUCCESS != ret)
         return ret;
-    ret = rn4871ResponseProcess(dev, pBuffer, bufferSize);
+    ret = rn4871ResponseProcess(dev, input, output);
     if(CODE_RETURN_SUCCESS != ret)
         return ret;
 
