@@ -1,15 +1,6 @@
 #include "rn4871.h"
 #include "rn4871_defs.h"
 
-#define PRIVATE_UUID_BYTES_SIZE     16
-#define PRIVATE_UUID_ASCII_SIZE     (PRIVATE_UUID_BYTES_SIZE*2)
-
-#define CHAR_PROPERTIES_BYTES_SIZE  1
-#define CHAR_PROPERTIES_ASCII_SIZE  (CHAR_PROPERTIES_BYTES_SIZE*2)
-
-#define CHAR_VALUES_BYTES_SIZE      1
-#define CHAR_VALUES_ASCII_SIZE      (CHAR_VALUES_BYTES_SIZE*2)
-
 static const char TABLE_COMMAND[][10] = {
     "",
     "$$$",
@@ -332,63 +323,4 @@ bool _checkHexaIsCorrect(const char *hexa, size_t size) {
             return false;
     }
     return true;
-}
-
-uint8_t _createCustomService(struct rn4871_dev_s *dev, struct service_param_s *service) {
-    assert((NULL != dev) || (NULL != service));
-
-    if(!_checkHexaIsCorrect(service->uuid, PRIVATE_UUID_ASCII_SIZE))
-        return CODE_RETURN_UUID_INCORRECT;
-
-    /* FSM must be at INIT state */
-    if(FSM_STATE_INIT != dev->fsm_state)
-        return CODE_RETURN_ERROR;
-
-    /* UUID and FSM state are correct at this step */
-    uint8_t input[BUFFER_UART_LEN_MAX+1] = "";
-    uint8_t output[BUFFER_UART_LEN_MAX+1] = "";
-    uint16_t inputSize = 0;
-    uint8_t ret = CODE_RETURN_ERROR;
-
-    ret = rn4871SendCmd(dev, CMD_CREATE_PRIVATE_SERVICE, service->uuid);
-    if(CODE_RETURN_SUCCESS != ret)
-        return ret;
-    ret = dev->uartRx(input, &inputSize);
-    if(CODE_RETURN_SUCCESS != ret)
-        return ret;
-    ret = rn4871ResponseProcess(dev, input, output);
-    if(CODE_RETURN_SUCCESS != ret)
-        return ret;
-
-    return ret;
-}
-
-uint8_t _createCustomChar(struct rn4871_dev_s *dev, struct char_param_s *characteristic) {
-    assert((NULL != dev) || (NULL != characteristic));
-
-    if(!_checkHexaIsCorrect(characteristic->uuid, PRIVATE_UUID_ASCII_SIZE))
-        return CODE_RETURN_UUID_INCORRECT;
-
-    /* FSM must be at INIT state */
-    if(FSM_STATE_INIT != dev->fsm_state)
-        return CODE_RETURN_ERROR;
-
-    /* UUID and FSM state are correct at this step */
-    uint8_t input[BUFFER_UART_LEN_MAX+1] = "";
-    uint8_t output[BUFFER_UART_LEN_MAX+1] = "";
-    uint16_t inputSize = 0;
-    uint8_t ret = CODE_RETURN_ERROR;
-
-    ret = rn4871SendCmd(dev, CMD_CREATE_PRIVATE_CHARACTERISTIC, "%s,%.02X,%.02X", \
-        characteristic->uuid, characteristic->properties, characteristic->size);
-    if(CODE_RETURN_SUCCESS != ret)
-        return ret;
-    ret = dev->uartRx(input, &inputSize);
-    if(CODE_RETURN_SUCCESS != ret)
-        return ret;
-    ret = rn4871ResponseProcess(dev, input, output);
-    if(CODE_RETURN_SUCCESS != ret)
-        return ret;
-
-    return ret;
 }

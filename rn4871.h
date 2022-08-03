@@ -11,7 +11,6 @@
 #include <assert.h>
 
 #include "rn4871_defs.h"
-#include "gatt.h"
 
 struct rn4871_dev_s {
     rn4871_com_fptr_t uartTx;
@@ -34,8 +33,5 @@ uint8_t rn4871GetDeviceName(struct rn4871_dev_s *dev, char *deviceName);
 uint8_t rn4871GetFirmwareVersion(struct rn4871_dev_s *dev, char *firmwareVersion);
 
 uint8_t rn4871TransparentUartSendData(struct rn4871_dev_s *dev, uint8_t *pBuffer, uint16_t bufferSize);
-
-uint8_t _createCustomService(struct rn4871_dev_s *dev, struct service_param_s *service);
-uint8_t _createCustomChar(struct rn4871_dev_s *dev, struct char_param_s *characteristic);
 
 #endif /* RN4871_H */
