@@ -27,6 +27,7 @@ uint8_t rn4871EnterCommandMode(struct rn4871_dev_s *dev);
 uint8_t rn4871RebootModule(struct rn4871_dev_s *dev);
 
 uint8_t rn4871SetServices(struct rn4871_dev_s *dev, uint16_t service);
+uint8_t rn4871SetDeviceName(struct rn4871_dev_s *dev, const char *deviceName, size_t sizeDeviceName);
 uint8_t rn4871EraseAllGattServices(struct rn4871_dev_s *dev);
 
 uint8_t rn4871GetDeviceName(struct rn4871_dev_s *dev, char *deviceName);

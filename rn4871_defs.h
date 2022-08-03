@@ -3,6 +3,8 @@
 
 #define BUFFER_UART_LEN_MAX (255)
 
+#define DEVICE_NAME_CHARACTER_MAX (20)
+
 enum rn4871_code_return_e {
     CODE_RETURN_SUCCESS,
     CODE_RETURN_ERROR,
