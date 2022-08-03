@@ -18,14 +18,18 @@ struct virtual_module_s {
     bool _commandMode;
     bool _transparentUart;
     char _bt_name[256];
-    char _module_name[25];
+    char _module_name[21];
+    char _mac_address[25];
+    char _firmware_version[200];
 };
 
 struct virtual_module_s virtualModule = {
     ._commandMode = false,
     ._transparentUart = false,
     ._bt_name = "",
-    ._module_name = "",
+    ._module_name = "RN4871-0790",
+    ._mac_address = "00:11:22:33:44:55",
+    ._firmware_version = "V1.40 7/9/2019 (c)Microship Technology Inc",
 };
 
 char pGlobalBuffer[BUFFER_MAX_LEN+1] = "";
@@ -99,7 +103,7 @@ void uartRxVirtualModule(const uint8_t *pInput, const uint16_t inputSize) {
         /* Send Dump infos */
     }
     else if (0 == strcmp(pInput, "V\r\n")){
-        /* Send firmware version */
+        snprintf(pGlobalBuffer, BUFFER_MAX_LEN, "%s\r\nCMD>", virtualModule._firmware_version);
     }
     else if (0 == strcmp(pInput, "PZ\r\n")){
         strncpy(pGlobalBuffer, "AOK\r\nCMD>", BUFFER_MAX_LEN);
