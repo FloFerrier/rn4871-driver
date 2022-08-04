@@ -1,3 +1,13 @@
+/**
+ * \file    rn4871_defs.h
+ * \defgroup RN4871_Definitions RN4871 Definitions
+ * \copyright nothing
+ *
+ * \brief   Header that contains generic definitions for driver RN4871 module.
+ *
+ * @{
+ */
+
 #ifndef RN4871_DEFS_H
 #define RN4871_DEFS_H
 
@@ -52,7 +62,24 @@ enum rn4871_service_e {
   RESERVED           = 0x10,
 };
 
+/*!
+ * \details Function template to add by customer for communicating through UART (depending on target board/system).
+ * \note UART = Universal Asynchronous Receiver and Transmitter
+ * 
+ * \param[in,out] pBuffer    : Buffer that contains elements to receive/transmit by the module.
+ * \param[in,out] bufferSize : Size of elements on the buffer pBuffer.
+ *
+ */
 typedef uint8_t (*rn4871_com_fptr_t)(uint8_t *pBuffer, uint16_t *bufferSize);
+
+/*!
+ * \details Function template to add by customer for waiting a delay (depending on target board/system). 
+ *
+ * \param[in] delay : Delay to wait in millisecond.
+ *
+ */
 typedef void (*rn4871_delay_fptr_t)(uint32_t delay);
 
 #endif /* RN4871_DEFS_H */
+
+ /**@}*/
