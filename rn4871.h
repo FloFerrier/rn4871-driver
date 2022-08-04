@@ -120,6 +120,29 @@ uint8_t rn4871GetFirmwareVersion(struct rn4871_dev_s *dev, char *firmwareVersion
 
 uint8_t rn4871TransparentUartSendData(struct rn4871_dev_s *dev, uint8_t *pBuffer, uint16_t bufferSize);
 
+/*!
+ * \details This API allows to get the FSM state for the module (software FSM).
+ * \note FSM = Finite State Machine
+ *
+ * \return Result of FSM state for the module RN4871
+ * \retval FSM_STATE_NONE
+ * \retval FSM_STATE_INIT
+ * \retval FSM_STATE_IDLE
+ * \retval FSM_STATE_CONNECTED
+ * \retval FSM_STATE_STREAMING
+ * \retval FSM_STATE_HALT
+ */
+enum rn4871_fsm_e rn4871GetFsmState(void);
+
+/*!
+ * \details This API allows to force the FSM state.
+ * \warning Use this API only for testing the module
+ * \note FSM = Finite State Machine
+ *
+ * \param[in] fsmForceState State to force on the FSM module.
+ */
+void rn4871SetForceFsmState(enum rn4871_fsm_e fsmForceState);
+
 #endif /* RN4871_H */
 
 /**@}*/

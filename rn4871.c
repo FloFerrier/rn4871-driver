@@ -21,7 +21,7 @@ static const char TABLE_COMMAND[][10] = {
 };
 
 static enum rn4871_cmd_e _current_cmd = CMD_NONE;
-static enum rn4871_fsm_e _fsm_state = FSM_STATE_INIT;
+static enum rn4871_fsm_e _fsm_state = FSM_STATE_NONE;
 
 static bool _checkHexaIsCorrect(const char *hexa, size_t size);
 static void _parseResponse(const char *response, char *proceededResponse);
@@ -356,4 +356,12 @@ uint8_t rn4871TransparentUartSendData(struct rn4871_dev_s *dev, uint8_t *pBuffer
         return CODE_RETURN_NO_STREAMING;
 
     return dev->uartTx(pBuffer, &bufferSize);
+}
+
+enum rn4871_fsm_e rn4871GetFsmState(void) {
+    return _fsm_state;
+}
+
+void rn4871SetForceFsmState(enum rn4871_fsm_e fsmForceState) {
+    _fsm_state = fsmForceState;
 }
