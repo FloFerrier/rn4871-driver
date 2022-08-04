@@ -124,7 +124,7 @@ uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *input, char 
 	uint8_t ret = CODE_RETURN_ERROR;
     enum rn4871_cmd_e cmd = _current_cmd;
 
-    if((NULL != strstr(input, "CMD>")) || (NULL != strstr(input, "REBOOT"))) {
+    if((NULL != strstr(input, "AOK")) || (NULL != strstr(input, "CMD>")) || (NULL != strstr(input, "REBOOT"))) {
         _fsm_state = FSM_STATE_INIT;
 
         /* Check if error is returned */
@@ -179,16 +179,16 @@ uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *input, char 
             }
         }
     }
-    else if(NULL != strstr(input, "CONNECTED")) {
-        _fsm_state = FSM_STATE_CONNECTED;
-		ret = CODE_RETURN_SUCCESS;
-    }
     else if(NULL != strstr(input, "STREAM_OPEN")) {
         _fsm_state = FSM_STATE_STREAMING;
 		ret = CODE_RETURN_SUCCESS;
     }
     else if(NULL != strstr(input, "DISCONNECT")) {
         _fsm_state = FSM_STATE_IDLE;
+		ret = CODE_RETURN_SUCCESS;
+    }
+    else if(NULL != strstr(input, "CONNECT")) {
+        _fsm_state = FSM_STATE_CONNECTED;
 		ret = CODE_RETURN_SUCCESS;
     }
 	return ret;
