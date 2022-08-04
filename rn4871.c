@@ -20,8 +20,28 @@ static const char TABLE_COMMAND[][10] = {
     "SHR",
 };
 
+static enum rn4871_cmd_e _current_cmd = CMD_NONE;
+static enum rn4871_fsm_e _fsm_state = FSM_STATE_INIT;
+
 static bool _checkHexaIsCorrect(const char *hexa, size_t size);
 static void _parseResponse(const char *response, char *proceededResponse);
+
+static uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const char *format, ...);
+static uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *input, char *output);
+
+bool _checkHexaIsCorrect(const char *hexa, size_t size) {
+    assert(NULL != hexa);
+
+    if(size != strlen(hexa))
+        return false;
+
+    /* Must contained only [A-F] or [0-9] characters */
+    for(int idx=0; idx < size; idx++) {
+        if(0 == isxdigit(hexa[idx]))
+            return false;
+    }
+    return true;
+}
 
 uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const char *format, ...) {
     assert(NULL != dev);
@@ -76,7 +96,7 @@ uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const cha
 			ret = CODE_RETURN_CMD_UNKNOWN;
         	break;
     }
-    dev->_current_cmd = cmd;
+    _current_cmd = cmd;
     va_end(args);
 
 	return ret;
@@ -103,10 +123,10 @@ uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *input, char 
     assert((NULL != dev) || (NULL != input) || (NULL != output));
 
 	uint8_t ret = CODE_RETURN_ERROR;
-    enum rn4871_cmd_e cmd = dev->_current_cmd;
+    enum rn4871_cmd_e cmd = _current_cmd;
 
     if((NULL != strstr(input, "CMD>")) || (NULL != strstr(input, "REBOOT"))) {
-        dev->fsm_state = FSM_STATE_INIT;
+        _fsm_state = FSM_STATE_INIT;
 
         /* Check if error is returned */
         if(NULL != strstr(input, "Err"))
@@ -150,7 +170,7 @@ uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *input, char 
                 }
                 case CMD_REBOOT:
                 case CMD_RESET_FACTORY: {
-                    dev->fsm_state = FSM_STATE_IDLE;
+                    _fsm_state = FSM_STATE_IDLE;
                     ret = CODE_RETURN_SUCCESS;
                     break;
                 }
@@ -161,15 +181,15 @@ uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *input, char 
         }
     }
     else if(NULL != strstr(input, "CONNECTED")) {
-        dev->fsm_state = FSM_STATE_CONNECTED;
+        _fsm_state = FSM_STATE_CONNECTED;
 		ret = CODE_RETURN_SUCCESS;
     }
     else if(NULL != strstr(input, "STREAM_OPEN")) {
-        dev->fsm_state = FSM_STATE_STREAMING;
+        _fsm_state = FSM_STATE_STREAMING;
 		ret = CODE_RETURN_SUCCESS;
     }
     else if(NULL != strstr(input, "DISCONNECT")) {
-        dev->fsm_state = FSM_STATE_IDLE;
+        _fsm_state = FSM_STATE_IDLE;
 		ret = CODE_RETURN_SUCCESS;
     }
 	return ret;
@@ -214,7 +234,7 @@ uint8_t rn4871RebootModule(struct rn4871_dev_s *dev) {
     if(CODE_RETURN_SUCCESS != ret)
         return ret;
 
-    dev->fsm_state = FSM_STATE_IDLE;
+    _fsm_state = FSM_STATE_IDLE;
     return ret;
 }
 
@@ -332,22 +352,8 @@ uint8_t rn4871EraseAllGattServices(struct rn4871_dev_s *dev) {
 uint8_t rn4871TransparentUartSendData(struct rn4871_dev_s *dev, uint8_t *pBuffer, uint16_t bufferSize) {
     assert((NULL != dev) || (NULL != pBuffer));
 
-    if(FSM_STATE_STREAMING != dev->fsm_state)
+    if(FSM_STATE_STREAMING != _fsm_state)
         return CODE_RETURN_NO_STREAMING;
 
     return dev->uartTx(pBuffer, &bufferSize);
-}
-
-bool _checkHexaIsCorrect(const char *hexa, size_t size) {
-    assert(NULL != hexa);
-
-    if(size != strlen(hexa))
-        return false;
-
-    /* Must contained only [A-F] or [0-9] characters */
-    for(int idx=0; idx < size; idx++) {
-        if(0 == isxdigit(hexa[idx]))
-            return false;
-    }
-    return true;
 }

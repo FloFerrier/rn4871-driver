@@ -48,6 +48,7 @@ enum rn4871_cmd_e {
 };
 
 enum rn4871_fsm_e {
+  FSM_STATE_NONE,
   FSM_STATE_INIT,
   FSM_STATE_IDLE,
   FSM_STATE_CONNECTED,
