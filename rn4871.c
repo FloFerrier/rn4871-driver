@@ -27,7 +27,6 @@ static bool _checkHexaIsCorrect(const char *hexa, size_t size);
 static void _parseResponse(const char *response, char *proceededResponse);
 
 static uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const char *format, ...);
-static uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *input, char *output);
 
 bool _checkHexaIsCorrect(const char *hexa, size_t size) {
     assert(NULL != hexa);
