@@ -15,24 +15,25 @@
 #define CHAR_VALUES_ASCII_SIZE      (CHAR_VALUES_BYTES_SIZE*2)
 
 struct virtual_module_s {
-    bool _commandMode;
-    bool _transparentUart;
-    char _bt_name[256];
-    char _module_name[21];
-    char _mac_address[25];
-    char _firmware_version[200];
+    bool commandMode;
+    bool transparentUart;
+    char bluetoothName[256];
+    char moduleName[21];
+    char macAddress[25];
+    char firmwareVersion[200];
 };
 
 struct virtual_module_s virtualModule = {
-    ._commandMode = false,
-    ._transparentUart = false,
-    ._bt_name = "",
-    ._module_name = "RN4871-0790",
-    ._mac_address = "00:11:22:33:44:55",
-    ._firmware_version = "V1.40 7/9/2019 (c)Microship Technology Inc",
+    .commandMode = false,
+    .transparentUart = false,
+    .bluetoothName = "",
+    .moduleName = "RN4871-0790",
+    .macAddress = "00:11:22:33:44:55",
+    .firmwareVersion = "RN4871 V1.40 7/9/2019 (c)Microship Technology Inc",
 };
 
 char pGlobalBuffer[BUFFER_MAX_LEN+1] = "";
+char saveBuffer[BUFFER_MAX_LEN+1] = "";
 
 static bool _checkHexaIsCorrect(const char *hexa, size_t size);
 
@@ -76,7 +77,7 @@ void uartRxVirtualModule(const uint8_t *pInput, const uint16_t inputSize) {
         char *saveptr;
         char *token = strtok_r((char*)pInput, delimiter, &saveptr);
         token = strtok_r(NULL, delimiter, &saveptr);
-        strcpy(virtualModule._bt_name, token);
+        strcpy(virtualModule.bluetoothName, token);
         strncpy(pGlobalBuffer, "AOK\r\nCMD>", BUFFER_MAX_LEN);
     }
     else if (0 != strstr(pInput, "SN")){
@@ -84,11 +85,11 @@ void uartRxVirtualModule(const uint8_t *pInput, const uint16_t inputSize) {
         char *saveptr;
         char *token = strtok_r((char*)pInput, delimiter, &saveptr);
         token = strtok_r(NULL, delimiter, &saveptr);
-        strcpy(virtualModule._module_name, token);
+        strcpy(virtualModule.moduleName, token);
         strncpy(pGlobalBuffer, "AOK\r\nCMD>", BUFFER_MAX_LEN);
     }
     else if (0 == strcmp(pInput, "GN\r\n")){
-        snprintf(pGlobalBuffer, BUFFER_MAX_LEN, "%s\r\nCMD>", virtualModule._module_name);
+        snprintf(pGlobalBuffer, BUFFER_MAX_LEN, "%s\r\nCMD>", virtualModule.moduleName);
     }
     else if (0 != strstr(pInput, "SS")){
         char delimiter[] = ",\r";
@@ -96,14 +97,14 @@ void uartRxVirtualModule(const uint8_t *pInput, const uint16_t inputSize) {
         char *token = strtok_r((char*)pInput, delimiter, &saveptr);
         token = strtok_r(NULL, delimiter, &saveptr);
         if (0 == strcmp("C0", token))
-            virtualModule._transparentUart = true;
+            virtualModule.transparentUart = true;
         strncpy(pGlobalBuffer, "AOK\r\nCMD>", BUFFER_MAX_LEN);
     }
     else if (0 == strcmp(pInput, "D\r\n")){
         /* Send Dump infos */
     }
     else if (0 == strcmp(pInput, "V\r\n")){
-        snprintf(pGlobalBuffer, BUFFER_MAX_LEN, "%s\r\nCMD>", virtualModule._firmware_version);
+        snprintf(pGlobalBuffer, BUFFER_MAX_LEN, "%s\r\nCMD>", virtualModule.firmwareVersion);
     }
     else if (0 == strcmp(pInput, "PZ\r\n")){
         strncpy(pGlobalBuffer, "AOK\r\nCMD>", BUFFER_MAX_LEN);
