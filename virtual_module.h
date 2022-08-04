@@ -22,6 +22,8 @@
 #include <ctype.h>
 #include <assert.h>
 
+#include "rn4871.h"
+
 /*!
  * \details This API allows to emulate UART Rx on the virtual module.
  *
@@ -39,6 +41,10 @@ void uartRxVirtualModule(const uint8_t *pInput, const uint16_t inputSize);
  *
  */
 void uartTxVirtualModule(uint8_t *pOutput, uint16_t *outputSize);
+
+void virtualModuleConnect(struct rn4871_dev_s *dev);
+void virtualModuleStream(struct rn4871_dev_s *dev);
+void virtualModuleDisconnect(struct rn4871_dev_s *dev);
 
 #endif /* VIRTUAL_MODULE__H */
  /**@}*/

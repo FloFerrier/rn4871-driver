@@ -182,4 +182,27 @@ void uartTxVirtualModule(uint8_t *pOutput, uint16_t *outputSize) {
     assert((NULL != pOutput) || (NULL != outputSize));
     strncpy(pOutput, pGlobalBuffer, BUFFER_MAX_LEN);
     *outputSize = strnlen(pGlobalBuffer, BUFFER_MAX_LEN);
+    printf("[VM:%d] %s\r\n", *outputSize, pOutput);
+    printf("[VM:%d] %s\r\n", *outputSize, pGlobalBuffer);
+}
+
+void virtualModuleConnect(struct rn4871_dev_s *dev) {
+    assert(NULL != dev);
+    strncpy(saveBuffer, "\%CONNECT,0,AABBCCDDEEFF\%", BUFFER_MAX_LEN);
+    uint16_t bufferLen = strlen(saveBuffer);
+    dev->uartRx(saveBuffer, &bufferLen);
+}
+
+void virtualModuleStream(struct rn4871_dev_s *dev) {
+    assert(NULL != dev);
+    strncpy(saveBuffer, "\%STREAM_OPEN\%", BUFFER_MAX_LEN);
+    uint16_t bufferLen = strlen(saveBuffer);
+    dev->uartRx(saveBuffer, &bufferLen);
+}
+
+void virtualModuleDisconnect(struct rn4871_dev_s *dev) {
+    assert(NULL != dev);
+    strncpy(saveBuffer, "\%DISCONNECT\%", BUFFER_MAX_LEN);
+    uint16_t bufferLen = strlen(saveBuffer);
+    dev->uartRx(saveBuffer, &bufferLen);
 }
