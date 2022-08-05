@@ -1,4 +1,5 @@
 #include "virtual_module.h"
+#include "utils.h"
 
 #define BUFFER_MAX_LEN (255)
 
@@ -34,23 +35,6 @@ struct virtual_module_s virtualModule = {
 
 char pGlobalBuffer[BUFFER_MAX_LEN+1] = "";
 char saveBuffer[BUFFER_MAX_LEN+1] = "";
-
-static bool _checkHexaIsCorrect(const char *hexa, size_t size);
-
-bool _checkHexaIsCorrect(const char *hexa, size_t size) {
-    assert(NULL != hexa);
-
-    if(size != strlen(hexa)) {
-        return false;
-    }
-
-    /* Must contain only [A-F] or [0-9] characters */
-    for(int idx=0; idx < size; idx++) {
-        if(0 == isxdigit(hexa[idx]))
-            return false;
-    }
-    return true;
-}
 
 void uartRxVirtualModule(const uint8_t *pInput, const uint16_t inputSize) {
     assert(NULL != pInput);
@@ -115,7 +99,7 @@ void uartRxVirtualModule(const uint8_t *pInput, const uint16_t inputSize) {
         char *saveptr;
         char *token = strtok_r((char*)pInput, delimiter, &saveptr);
         token = strtok_r(NULL, delimiter, &saveptr);
-        if (!_checkHexaIsCorrect(token, PRIVATE_UUID_ASCII_SIZE))
+        if (!checkHexaIsCorrect(token, PRIVATE_UUID_ASCII_SIZE))
             strncpy(pGlobalBuffer, "Err\r\nCMD>", BUFFER_MAX_LEN);
         else
             strncpy(pGlobalBuffer, "AOK\r\nCMD>", BUFFER_MAX_LEN);
@@ -126,19 +110,19 @@ void uartRxVirtualModule(const uint8_t *pInput, const uint16_t inputSize) {
         char *token = strtok_r((char*)pInput, delimiter, &saveptr);
         /* Get characteristic UUID */
         token = strtok_r(NULL, delimiter, &saveptr);
-        if (!_checkHexaIsCorrect(token, PRIVATE_UUID_ASCII_SIZE)) {
+        if (!checkHexaIsCorrect(token, PRIVATE_UUID_ASCII_SIZE)) {
             strncpy(pGlobalBuffer, "Err\r\nCMD>", BUFFER_MAX_LEN);
             return;
         }
         /* Get characteristic properties */
         token = strtok_r(NULL, delimiter, &saveptr);
-        if (!_checkHexaIsCorrect(token, CHAR_PROPERTIES_ASCII_SIZE)) {
+        if (!checkHexaIsCorrect(token, CHAR_PROPERTIES_ASCII_SIZE)) {
             strncpy(pGlobalBuffer, "Err\r\nCMD>", BUFFER_MAX_LEN);
             return;
         }
         /* Get characteristic value size */
         token = strtok_r(NULL, delimiter, &saveptr);
-        if (!_checkHexaIsCorrect(token, CHAR_VALUES_ASCII_SIZE))
+        if (!checkHexaIsCorrect(token, CHAR_VALUES_ASCII_SIZE))
             strncpy(pGlobalBuffer, "Err\r\nCMD>", BUFFER_MAX_LEN);
         else
             strncpy(pGlobalBuffer, "AOK\r\nCMD>", BUFFER_MAX_LEN);
@@ -149,13 +133,13 @@ void uartRxVirtualModule(const uint8_t *pInput, const uint16_t inputSize) {
         char *token = strtok_r((char*)pInput, delimiter, &saveptr);
         /* Get characteristic handle */
         token = strtok_r(NULL, delimiter, &saveptr);
-        if (!_checkHexaIsCorrect(token, CHAR_HANDLE_ASCII_SIZE)) {
+        if (!checkHexaIsCorrect(token, CHAR_HANDLE_ASCII_SIZE)) {
             strncpy(pGlobalBuffer, "Err\r\nCMD>", BUFFER_MAX_LEN);
             return;
         }
         /* Get characteristic value */
         token = strtok_r(NULL, delimiter, &saveptr);
-        if (!_checkHexaIsCorrect(token, CHAR_VALUES_ASCII_SIZE)) {
+        if (!checkHexaIsCorrect(token, CHAR_VALUES_ASCII_SIZE)) {
             strncpy(pGlobalBuffer, "Err\r\nCMD>", BUFFER_MAX_LEN);
             return;
         }
@@ -168,7 +152,7 @@ void uartRxVirtualModule(const uint8_t *pInput, const uint16_t inputSize) {
         char *token = strtok_r((char*)pInput, delimiter, &saveptr);
         /* Get characteristic handle */
         token = strtok_r(NULL, delimiter, &saveptr);
-        if (!_checkHexaIsCorrect(token, CHAR_HANDLE_ASCII_SIZE))
+        if (!checkHexaIsCorrect(token, CHAR_HANDLE_ASCII_SIZE))
             strncpy(pGlobalBuffer, "Err\r\nCMD>", BUFFER_MAX_LEN);
         else
             strncpy(pGlobalBuffer, "12\r\nCMD>", BUFFER_MAX_LEN);

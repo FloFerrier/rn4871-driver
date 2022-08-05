@@ -25,7 +25,9 @@ set(SOURCE_FILES
 	rn4871.c
 	rn4871.h
 	virtual_module.c
-	virtual_module.h)
+	virtual_module.h
+  utils.c
+  utils.h)
 
 add_library(librn4871-driver STATIC ${SOURCE_FILES})
 

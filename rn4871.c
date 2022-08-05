@@ -1,5 +1,6 @@
 #include "rn4871.h"
 #include "rn4871_defs.h"
+#include "utils.h"
 
 enum dump_infos_field_e {
   FIELD_MAC_ADDRESS,
@@ -41,26 +42,10 @@ static const char TABLE_COMMAND[][10] = {
 static enum rn4871_cmd_e _current_cmd = CMD_NONE;
 static enum rn4871_fsm_e _fsm_state = FSM_STATE_NONE;
 
-static bool _checkHexaIsCorrect(const char *hexa, size_t size);
-
 static uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const char *format, ...);
 static uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *input);
 static void rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, char *result);
 static void rn4871ParseFirmwareVersion(const char *firmwareVersion, char *result);
-
-bool _checkHexaIsCorrect(const char *hexa, size_t size) {
-    assert(NULL != hexa);
-
-    if(size != strlen(hexa))
-        return false;
-
-    /* Must contained only [A-F] or [0-9] characters */
-    for(int idx=0; idx < size; idx++) {
-        if(0 == isxdigit(hexa[idx]))
-            return false;
-    }
-    return true;
-}
 
 uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const char *format, ...) {
     assert(NULL != dev);

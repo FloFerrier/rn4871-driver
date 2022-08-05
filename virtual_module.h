@@ -19,7 +19,6 @@
 #include <stddef.h>
 #include <string.h>
 #include <stdio.h>
-#include <ctype.h>
 #include <assert.h>
 
 #include "rn4871.h"
