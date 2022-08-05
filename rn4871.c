@@ -247,23 +247,30 @@ uint8_t rn4871SetDeviceName(struct rn4871_dev_s *dev, const char *deviceName, si
 uint8_t rn4871GetDeviceName(struct rn4871_dev_s *dev, char *deviceName) {
     assert((NULL != dev) || (NULL != deviceName));
 
-    uint8_t ret = CODE_RETURN_ERROR;
-    char response[BUFFER_UART_LEN_MAX+1] = "";
-    uint16_t responseSize = 0;
-
-    ret = rn4871SendCmd(dev, CMD_GET_DEVICE_NAME, NULL);
-    if(CODE_RETURN_SUCCESS != ret)
-        return ret;
-    ret = dev->uartRx(response, &responseSize);
-    if(CODE_RETURN_SUCCESS != ret)
-        return ret;
-    ret = rn4871ResponseProcess(dev, response, deviceName);
-    if(CODE_RETURN_SUCCESS != ret)
-        return ret;
-
-    if(0 >= strlen(deviceName))
+    char infos[BUFFER_UART_LEN_MAX+1] = "";
+    uint8_t ret = rn4871DumpInfos(dev, infos);
+    uint16_t infosSize = strlen(infos);
+    if((CODE_RETURN_SUCCESS != ret) || (0 >= infosSize))
         return CODE_RETURN_ERROR;
 
+    /* Parse infos string to get Mac Address */
+    char *saveptr;
+    char delimiter[] = "\r\n";
+    char *token = strtok_r(infos, delimiter, &saveptr);
+    do {
+        if(NULL != strstr(token, "Name=")) {
+            break;
+        }
+        token = strtok_r(NULL, delimiter, &saveptr);
+    } while(NULL != token);
+
+    if(NULL == token)
+        return CODE_RETURN_ERROR;
+
+    char *tmp;
+    tmp = strtok_r(token, "=", &saveptr);
+    tmp = strtok_r(NULL, "=", &saveptr);
+    strncpy(deviceName, tmp, BUFFER_UART_LEN_MAX);
     return ret;
 }
 
@@ -280,13 +287,76 @@ uint8_t rn4871GetFirmwareVersion(struct rn4871_dev_s *dev, char *firmwareVersion
     ret = dev->uartRx(response, &responseSize);
     if(CODE_RETURN_SUCCESS != ret)
         return ret;
-    ret = rn4871ResponseProcess(dev, response, firmwareVersion);
+    ret = rn4871ResponseProcess(dev, response);
     if(CODE_RETURN_SUCCESS != ret)
         return ret;
 
-    if(0 >= strlen(firmwareVersion))
+    /* Parse version string to get version number only*/
+    char *saveptr;
+    char delimiter[] = " \r\n";
+    char *token = strtok_r(response, delimiter, &saveptr);
+    do {
+        if(NULL != strstr(token, "V")) {
+            break;
+        }
+        token = strtok_r(NULL, delimiter, &saveptr);
+    } while(NULL != token);
+
+    if(NULL == token)
         return CODE_RETURN_ERROR;
 
+    strncpy(firmwareVersion, token, BUFFER_UART_LEN_MAX);
+    return ret;
+}
+
+uint8_t rn4871DumpInfos(struct rn4871_dev_s *dev, char *infos) {
+    assert((NULL != dev) || (NULL != infos));
+
+    uint8_t ret = CODE_RETURN_ERROR;
+    char response[BUFFER_UART_LEN_MAX+1] = "";
+    uint16_t responseSize = 0;
+
+    ret = rn4871SendCmd(dev, CMD_DUMP_INFOS, NULL);
+    if(CODE_RETURN_SUCCESS != ret)
+        return ret;
+    ret = dev->uartRx(response, &responseSize);
+    if((CODE_RETURN_SUCCESS != ret) || (0 >= responseSize))
+        return CODE_RETURN_ERROR;
+    ret = rn4871ResponseProcess(dev, response);
+    if(CODE_RETURN_SUCCESS != ret)
+        return ret;
+
+    strncpy(infos, response, BUFFER_UART_LEN_MAX);
+    return ret;
+}
+
+uint8_t rn4871GetMacAddress(struct rn4871_dev_s *dev, char *macAddress) {
+    assert((NULL != dev) || (NULL != macAddress));
+
+    char infos[BUFFER_UART_LEN_MAX+1] = "";
+    uint8_t ret = rn4871DumpInfos(dev, infos);
+    uint16_t infosSize = strlen(infos);
+    if((CODE_RETURN_SUCCESS != ret) || (0 >= infosSize))
+        return CODE_RETURN_ERROR;
+
+    /* Parse infos string to get Mac Address */
+    char *saveptr;
+    char delimiter[] = "\r\n";
+    char *token = strtok_r(infos, delimiter, &saveptr);
+    do {
+        if(NULL != strstr(token, "BTA=")) {
+            break;
+        }
+        token = strtok_r(NULL, delimiter, &saveptr);
+    } while(NULL != token);
+
+    if(NULL == token)
+        return CODE_RETURN_ERROR;
+
+    char *tmp;
+    tmp = strtok_r(token, "=", &saveptr);
+    tmp = strtok_r(NULL, "=", &saveptr);
+    strncpy(macAddress, tmp, BUFFER_UART_LEN_MAX);
     return ret;
 }
 

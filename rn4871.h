@@ -118,6 +118,36 @@ uint8_t rn4871GetDeviceName(struct rn4871_dev_s *dev, char *deviceName);
  */
 uint8_t rn4871GetFirmwareVersion(struct rn4871_dev_s *dev, char *firmwareVersion);
 
+/*!
+ * \details This API allows to dump infos as :
+ *           - BTA    = mac address
+ *           - Name   = device name
+ *           - Connected
+ *           - Authen = authentification
+ *           - Features
+ *           - Services
+ *
+ * \param[in,out] dev : Structure instance of rn4871_dev_s
+ * \param[out]    macAddress : Buffer that contains infos string
+ *
+ * \return Result of API execution status
+ * \retval CODE_RETURN_ERROR
+ * \retval CODE_RETURN_SUCCESS
+ */
+uint8_t rn4871DumpInfos(struct rn4871_dev_s *dev, char *infos);
+
+/*!
+ * \details This API allows to get the mac address for the module.
+ *
+ * \param[in,out] dev : Structure instance of rn4871_dev_s
+ * \param[out]    macAddress : Buffer that contains mac address string
+ *
+ * \return Result of API execution status
+ * \retval CODE_RETURN_ERROR
+ * \retval CODE_RETURN_SUCCESS
+ */
+uint8_t rn4871GetMacAddress(struct rn4871_dev_s *dev, char *macAddress);
+
 uint8_t rn4871TransparentUartSendData(struct rn4871_dev_s *dev, uint8_t *pBuffer, uint16_t bufferSize);
 
 /*!
