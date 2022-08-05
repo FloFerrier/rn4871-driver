@@ -54,14 +54,6 @@ void uartRxVirtualModule(const uint8_t *pInput, const uint16_t inputSize) {
     else if (0 == strcmp(pInput, "SF,2\r\n")){
         strncpy(pGlobalBuffer, "Rebooting\r\n%REBOOT%", BUFFER_MAX_LEN);
     }
-    else if (0 != strstr(pInput, "S-")){
-        char delimiter[] = ",\r";
-        char *saveptr;
-        char *token = strtok_r((char*)pInput, delimiter, &saveptr);
-        token = strtok_r(NULL, delimiter, &saveptr);
-        strcpy(virtualModule.bluetoothName, token);
-        strncpy(pGlobalBuffer, "AOK\r\nCMD>", BUFFER_MAX_LEN);
-    }
     else if (0 != strstr(pInput, "SN")){
         char delimiter[] = ",\r";
         char *saveptr;
