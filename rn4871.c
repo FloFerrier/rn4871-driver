@@ -46,6 +46,7 @@ static bool _checkHexaIsCorrect(const char *hexa, size_t size);
 static uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const char *format, ...);
 static uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *input);
 static void rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, char *result);
+static void rn4871ParseFirmwareVersion(const char *firmwareVersion, char *result);
 
 bool _checkHexaIsCorrect(const char *hexa, size_t size) {
     assert(NULL != hexa);
@@ -276,6 +277,22 @@ uint8_t rn4871GetDeviceName(struct rn4871_dev_s *dev, char *deviceName) {
     return ret;
 }
 
+void rn4871ParseFirmwareVersion(const char *firmwareVersion, char *result) {
+    assert((NULL != firmwareVersion) || (NULL != result));
+
+    char *saveptr;
+    char delimiter[] = " \r\n";
+    char *token = strtok_r((char*)firmwareVersion, delimiter, &saveptr);
+    do {
+        if(NULL != strstr(token, "V")) {
+            break;
+        }
+        token = strtok_r(NULL, delimiter, &saveptr);
+    } while(NULL != token);
+
+    strncpy(result, token, BUFFER_UART_LEN_MAX);
+}
+
 uint8_t rn4871GetFirmwareVersion(struct rn4871_dev_s *dev, char *firmwareVersion) {
     assert((NULL != dev) || (NULL != firmwareVersion));
 
@@ -293,21 +310,7 @@ uint8_t rn4871GetFirmwareVersion(struct rn4871_dev_s *dev, char *firmwareVersion
     if(CODE_RETURN_SUCCESS != ret)
         return ret;
 
-    /* Parse version string to get version number only*/
-    char *saveptr;
-    char delimiter[] = " \r\n";
-    char *token = strtok_r(response, delimiter, &saveptr);
-    do {
-        if(NULL != strstr(token, "V")) {
-            break;
-        }
-        token = strtok_r(NULL, delimiter, &saveptr);
-    } while(NULL != token);
-
-    if(NULL == token)
-        return CODE_RETURN_ERROR;
-
-    strncpy(firmwareVersion, token, BUFFER_UART_LEN_MAX);
+    rn4871ParseFirmwareVersion(response, firmwareVersion);
     return ret;
 }
 
