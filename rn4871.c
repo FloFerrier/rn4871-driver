@@ -338,7 +338,6 @@ uint8_t rn4871DumpInfos(struct rn4871_dev_s *dev, char *infos) {
 void rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, char *result) {
     assert((NULL != infos) || (NULL != result));
 
-    /* Parse infos string to get Mac Address */
     char *saveptr;
     char delimiter[] = "\r\n";
     char *token = strtok_r((char*)infos, delimiter, &saveptr);
