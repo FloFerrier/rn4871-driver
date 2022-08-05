@@ -1,6 +1,24 @@
 #include "rn4871.h"
 #include "rn4871_defs.h"
 
+enum dump_infos_field_e {
+  FIELD_MAC_ADDRESS,
+  FIELD_DEVICE_NAME,
+  FIELD_CONNECTION,
+  FIELD_AUTHENTIFICATION,
+  FIELD_FEATURES,
+  FIELD_SERVICES,
+};
+
+static const char DUMP_INFOS_FIELD[][10] = {
+    "BTA=",
+    "Name=",
+    "Connected=",
+    "Authen=",
+    "Features=",
+    "Services=",
+};
+
 static const char TABLE_COMMAND[][10] = {
     "",
     "$$$",
@@ -27,6 +45,7 @@ static bool _checkHexaIsCorrect(const char *hexa, size_t size);
 
 static uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const char *format, ...);
 static uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *input);
+static void rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, char *result);
 
 bool _checkHexaIsCorrect(const char *hexa, size_t size) {
     assert(NULL != hexa);
@@ -253,24 +272,7 @@ uint8_t rn4871GetDeviceName(struct rn4871_dev_s *dev, char *deviceName) {
     if((CODE_RETURN_SUCCESS != ret) || (0 >= infosSize))
         return CODE_RETURN_ERROR;
 
-    /* Parse infos string to get Mac Address */
-    char *saveptr;
-    char delimiter[] = "\r\n";
-    char *token = strtok_r(infos, delimiter, &saveptr);
-    do {
-        if(NULL != strstr(token, "Name=")) {
-            break;
-        }
-        token = strtok_r(NULL, delimiter, &saveptr);
-    } while(NULL != token);
-
-    if(NULL == token)
-        return CODE_RETURN_ERROR;
-
-    char *tmp;
-    tmp = strtok_r(token, "=", &saveptr);
-    tmp = strtok_r(NULL, "=", &saveptr);
-    strncpy(deviceName, tmp, BUFFER_UART_LEN_MAX);
+    rn4871ParseDumpInfos(infos, FIELD_DEVICE_NAME, deviceName);
     return ret;
 }
 
@@ -330,6 +332,29 @@ uint8_t rn4871DumpInfos(struct rn4871_dev_s *dev, char *infos) {
     return ret;
 }
 
+void rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, char *result) {
+    assert((NULL != infos) || (NULL != result));
+
+    /* Parse infos string to get Mac Address */
+    char *saveptr;
+    char delimiter[] = "\r\n";
+    char *token = strtok_r((char*)infos, delimiter, &saveptr);
+    do {
+        if(NULL != strstr(token, DUMP_INFOS_FIELD[field])) {
+            break;
+        }
+        token = strtok_r(NULL, delimiter, &saveptr);
+    } while(NULL != token);
+
+    if(NULL == token)
+        return;
+
+    char *tmp;
+    tmp = strtok_r(token, "=", &saveptr);
+    tmp = strtok_r(NULL, "=", &saveptr);
+    strncpy(result, tmp, BUFFER_UART_LEN_MAX);
+}
+
 uint8_t rn4871GetMacAddress(struct rn4871_dev_s *dev, char *macAddress) {
     assert((NULL != dev) || (NULL != macAddress));
 
@@ -339,24 +364,7 @@ uint8_t rn4871GetMacAddress(struct rn4871_dev_s *dev, char *macAddress) {
     if((CODE_RETURN_SUCCESS != ret) || (0 >= infosSize))
         return CODE_RETURN_ERROR;
 
-    /* Parse infos string to get Mac Address */
-    char *saveptr;
-    char delimiter[] = "\r\n";
-    char *token = strtok_r(infos, delimiter, &saveptr);
-    do {
-        if(NULL != strstr(token, "BTA=")) {
-            break;
-        }
-        token = strtok_r(NULL, delimiter, &saveptr);
-    } while(NULL != token);
-
-    if(NULL == token)
-        return CODE_RETURN_ERROR;
-
-    char *tmp;
-    tmp = strtok_r(token, "=", &saveptr);
-    tmp = strtok_r(NULL, "=", &saveptr);
-    strncpy(macAddress, tmp, BUFFER_UART_LEN_MAX);
+    rn4871ParseDumpInfos(infos, FIELD_MAC_ADDRESS, macAddress);
     return ret;
 }
 
@@ -369,23 +377,8 @@ uint8_t rn4871GetServices(struct rn4871_dev_s *dev, uint16_t *services) {
     if((CODE_RETURN_SUCCESS != ret) || (0 >= infosSize))
         return CODE_RETURN_ERROR;
 
-    /* Parse infos string to get Services */
-    char *saveptr;
-    char delimiter[] = "\r\n";
-    char *token = strtok_r(infos, delimiter, &saveptr);
-    do {
-        if(NULL != strstr(token, "Services=")) {
-            break;
-        }
-        token = strtok_r(NULL, delimiter, &saveptr);
-    } while(NULL != token);
-
-    if(NULL == token)
-        return CODE_RETURN_ERROR;
-
-    char *tmp;
-    tmp = strtok_r(token, "=", &saveptr);
-    tmp = strtok_r(NULL, "=", &saveptr);
+    char tmp[BUFFER_UART_LEN_MAX+1] = "";
+    rn4871ParseDumpInfos(infos, FIELD_SERVICES, tmp);
     *services = (uint16_t)strtol(tmp, NULL, 16);
     return ret;
 }
