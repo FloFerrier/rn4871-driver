@@ -273,7 +273,9 @@ uint8_t rn4871GetDeviceName(struct rn4871_dev_s *dev, char *deviceName) {
     char infos[BUFFER_UART_LEN_MAX+1] = "";
     uint8_t ret = rn4871DumpInfos(dev, infos);
     uint16_t infosSize = strlen(infos);
-    if((CODE_RETURN_SUCCESS != ret) || (0 >= infosSize))
+    if(CODE_RETURN_SUCCESS != ret)
+        return ret;
+    if(0 >= infosSize)
         return CODE_RETURN_ERROR;
 
     rn4871ParseDumpInfos(infos, FIELD_DEVICE_NAME, deviceName);
@@ -366,7 +368,9 @@ uint8_t rn4871GetMacAddress(struct rn4871_dev_s *dev, char *macAddress) {
     char infos[BUFFER_UART_LEN_MAX+1] = "";
     uint8_t ret = rn4871DumpInfos(dev, infos);
     uint16_t infosSize = strlen(infos);
-    if((CODE_RETURN_SUCCESS != ret) || (0 >= infosSize))
+    if(CODE_RETURN_SUCCESS != ret)
+        return ret;
+    if(0 >= infosSize)
         return CODE_RETURN_ERROR;
 
     rn4871ParseDumpInfos(infos, FIELD_MAC_ADDRESS, macAddress);
@@ -379,7 +383,9 @@ uint8_t rn4871GetServices(struct rn4871_dev_s *dev, uint16_t *services) {
     char infos[BUFFER_UART_LEN_MAX+1] = "";
     uint8_t ret = rn4871DumpInfos(dev, infos);
     uint16_t infosSize = strlen(infos);
-    if((CODE_RETURN_SUCCESS != ret) || (0 >= infosSize))
+    if(CODE_RETURN_SUCCESS != ret)
+        return ret;
+    if(0 >= infosSize)
         return CODE_RETURN_ERROR;
 
     char tmp[BUFFER_UART_LEN_MAX+1] = "";
