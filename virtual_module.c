@@ -17,20 +17,18 @@
 
 struct virtual_module_s {
     bool commandMode;
-    bool transparentUart;
-    char bluetoothName[256];
     char moduleName[21];
     char macAddress[25];
     char firmwareVersion[200];
+    uint16_t services;
 };
 
 struct virtual_module_s virtualModule = {
     .commandMode = false,
-    .transparentUart = false,
-    .bluetoothName = "",
-    .moduleName = "RN4871-0790",
-    .macAddress = "00:11:22:33:44:55",
-    .firmwareVersion = "RN4871 V1.40 7/9/2019 (c)Microship Technology Inc",
+    .moduleName = "RN4871-VM",
+    .macAddress = "001122334455",
+    .firmwareVersion = "V1.40",
+    .services = 0x80,
 };
 
 char pGlobalBuffer[BUFFER_MAX_LEN+1] = "";
@@ -80,15 +78,23 @@ void uartRxVirtualModule(const uint8_t *pInput, const uint16_t inputSize) {
         char *saveptr;
         char *token = strtok_r((char*)pInput, delimiter, &saveptr);
         token = strtok_r(NULL, delimiter, &saveptr);
-        if (0 == strcmp("C0", token))
-            virtualModule.transparentUart = true;
-        strncpy(pGlobalBuffer, "AOK\r\nCMD>", BUFFER_MAX_LEN);
+        long services = strtol(token, NULL, 16);
+        if((0xF0 >= services) && (0 <= services)) {
+            strncpy(pGlobalBuffer, "AOK\r\nCMD>", BUFFER_MAX_LEN);
+            virtualModule.services = (uint16_t)services;
+        }
+        else {
+            strncpy(pGlobalBuffer, "Err\r\nCMD>", BUFFER_MAX_LEN);
+        }
     }
     else if (0 == strcmp(pInput, "D\r\n")){
-        /* Send Dump infos */
+        snprintf(pGlobalBuffer, BUFFER_MAX_LEN,
+            "BTA=%s\r\nName=%s\r\nConnected=no\r\nAuthen=0\r\nFeatures=0000\r\nServices=%X\r\nCMD>",
+            virtualModule.macAddress, virtualModule.moduleName, virtualModule.services);
     }
     else if (0 == strcmp(pInput, "V\r\n")){
-        snprintf(pGlobalBuffer, BUFFER_MAX_LEN, "%s\r\nCMD>", virtualModule.firmwareVersion);
+        snprintf(pGlobalBuffer, BUFFER_MAX_LEN,
+            "RN4871 %s 7/9/2019 (c)Microship Technology Inc\r\nCMD>", virtualModule.firmwareVersion);
     }
     else if (0 == strcmp(pInput, "PZ\r\n")){
         strncpy(pGlobalBuffer, "AOK\r\nCMD>", BUFFER_MAX_LEN);
