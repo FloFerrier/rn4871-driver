@@ -188,6 +188,13 @@ enum rn4871_fsm_e rn4871GetFsmState(void);
  */
 void rn4871SetForceFsmState(enum rn4871_fsm_e fsmForceState);
 
+/*!
+ * \details This API allows to force the data mode.
+ * \warning Use this API only for testing the module
+ *
+ */
+void rn4871SetForceDataMode(void);
+
 #endif /* RN4871_H */
 
 /**@}*/

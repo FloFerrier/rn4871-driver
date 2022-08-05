@@ -2,13 +2,18 @@
 #include "rn4871_defs.h"
 #include "utils.h"
 
+enum rn4871_mode_e {
+    DATA_MODE,
+    COMMAND_MODE,
+};
+
 enum dump_infos_field_e {
-  FIELD_MAC_ADDRESS,
-  FIELD_DEVICE_NAME,
-  FIELD_CONNECTION,
-  FIELD_AUTHENTIFICATION,
-  FIELD_FEATURES,
-  FIELD_SERVICES,
+    FIELD_MAC_ADDRESS,
+    FIELD_DEVICE_NAME,
+    FIELD_CONNECTION,
+    FIELD_AUTHENTIFICATION,
+    FIELD_FEATURES,
+    FIELD_SERVICES,
 };
 
 static const char DUMP_INFOS_FIELD[][10] = {
@@ -39,6 +44,7 @@ static const char TABLE_COMMAND[][10] = {
     "SHR",
 };
 
+static enum rn4871_mode_e _current_mode = DATA_MODE;
 static enum rn4871_cmd_e _current_cmd = CMD_NONE;
 static enum rn4871_fsm_e _fsm_state = FSM_STATE_NONE;
 
@@ -56,6 +62,10 @@ uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const cha
 	uint8_t pBuffer[BUFFER_UART_LEN_MAX+1] = "";
 	uint16_t bufferSize = 0;
 	uint8_t ret = CODE_RETURN_ERROR;
+
+    if((COMMAND_MODE != _current_mode) && (CMD_MODE_ENTER != cmd)) {
+        return CODE_RETURN_NO_COMMAND_MODE;
+    }
 
     switch(cmd) {
         /* Commands without argument */
@@ -120,8 +130,16 @@ uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *input) {
         /* Parse and get data from response */
         else {
             switch(cmd) {
-                case CMD_MODE_ENTER:
-                case CMD_MODE_QUIT:
+                case CMD_MODE_ENTER: {
+                    ret = CODE_RETURN_SUCCESS;
+                    _current_mode = COMMAND_MODE;
+                    break;
+                }
+                case CMD_MODE_QUIT: {
+                    ret = CODE_RETURN_SUCCESS;
+                    _current_mode = DATA_MODE;
+                    break;
+                }
                 case CMD_SET_BT_NAME:
                 case CMD_SET_DEVICE_NAME:
                 case CMD_SET_SERVICES:
@@ -139,6 +157,7 @@ uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *input) {
                 case CMD_REBOOT:
                 case CMD_RESET_FACTORY: {
                     _fsm_state = FSM_STATE_IDLE;
+                    _current_mode = DATA_MODE;
                     ret = CODE_RETURN_SUCCESS;
                     break;
                 }
@@ -392,7 +411,12 @@ uint8_t rn4871EraseAllGattServices(struct rn4871_dev_s *dev) {
 uint8_t rn4871TransparentUartSendData(struct rn4871_dev_s *dev, uint8_t *pBuffer, uint16_t bufferSize) {
     assert((NULL != dev) || (NULL != pBuffer));
 
-    if(FSM_STATE_STREAMING != _fsm_state)
+    /* Must on data mode */
+    if(DATA_MODE != _current_mode)
+        return CODE_RETURN_NO_DATA_MODE;
+
+    /* Must on streaming state */
+    if(FSM_STATE_STREAMING != rn4871GetFsmState())
         return CODE_RETURN_NO_STREAMING;
 
     return dev->uartTx(pBuffer, &bufferSize);
@@ -404,4 +428,8 @@ enum rn4871_fsm_e rn4871GetFsmState(void) {
 
 void rn4871SetForceFsmState(enum rn4871_fsm_e fsmForceState) {
     _fsm_state = fsmForceState;
+}
+
+void rn4871SetForceDataMode(void) {
+    _current_mode = DATA_MODE;
 }
