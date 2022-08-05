@@ -43,7 +43,6 @@ static enum rn4871_cmd_e _current_cmd = CMD_NONE;
 static enum rn4871_fsm_e _fsm_state = FSM_STATE_NONE;
 
 static uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const char *format, ...);
-static uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *input);
 static void rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, char *result);
 static void rn4871ParseFirmwareVersion(const char *firmwareVersion, char *result);
 

@@ -31,6 +31,8 @@ struct rn4871_dev_s {
     rn4871_delay_fptr_t delayMs;
 };
 
+uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *input);
+
 /*!
  * \details This API allows to enter on command mode for the module.
  * It is the entry point, call this API before using other APIs for configuring
