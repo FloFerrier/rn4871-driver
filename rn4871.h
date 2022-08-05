@@ -21,6 +21,7 @@
 #include <stdarg.h>
 #include <ctype.h>
 #include <assert.h>
+#include <stdlib.h>
 
 #include "rn4871_defs.h"
 
@@ -93,6 +94,18 @@ uint8_t rn4871SetDeviceName(struct rn4871_dev_s *dev, const char *deviceName, si
  * \retval CODE_RETURN_SUCCESS
  */
 uint8_t rn4871EraseAllGattServices(struct rn4871_dev_s *dev);
+
+/*!
+ * \details This API allows to get the services for the module.
+ *
+ * \param[in,out] dev : Structure instance of rn4871_dev_s
+ * \param[out]    services : Refer to enum rn4871_service_e for having mask bits
+ *
+ * \return Result of API execution status
+ * \retval CODE_RETURN_ERROR
+ * \retval CODE_RETURN_SUCCESS
+ */
+uint8_t rn4871GetServices(struct rn4871_dev_s *dev, uint16_t *services);
 
 /*!
  * \details This API allows to get the device name for the module.

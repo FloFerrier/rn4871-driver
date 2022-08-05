@@ -360,6 +360,36 @@ uint8_t rn4871GetMacAddress(struct rn4871_dev_s *dev, char *macAddress) {
     return ret;
 }
 
+uint8_t rn4871GetServices(struct rn4871_dev_s *dev, uint16_t *services) {
+    assert((NULL != dev) || (NULL != services));
+
+    char infos[BUFFER_UART_LEN_MAX+1] = "";
+    uint8_t ret = rn4871DumpInfos(dev, infos);
+    uint16_t infosSize = strlen(infos);
+    if((CODE_RETURN_SUCCESS != ret) || (0 >= infosSize))
+        return CODE_RETURN_ERROR;
+
+    /* Parse infos string to get Services */
+    char *saveptr;
+    char delimiter[] = "\r\n";
+    char *token = strtok_r(infos, delimiter, &saveptr);
+    do {
+        if(NULL != strstr(token, "Services=")) {
+            break;
+        }
+        token = strtok_r(NULL, delimiter, &saveptr);
+    } while(NULL != token);
+
+    if(NULL == token)
+        return CODE_RETURN_ERROR;
+
+    char *tmp;
+    tmp = strtok_r(token, "=", &saveptr);
+    tmp = strtok_r(NULL, "=", &saveptr);
+    *services = (uint16_t)strtol(tmp, NULL, 16);
+    return ret;
+}
+
 uint8_t rn4871EraseAllGattServices(struct rn4871_dev_s *dev) {
     assert(NULL != dev);
 
