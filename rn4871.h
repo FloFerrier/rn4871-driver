@@ -47,6 +47,17 @@ uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *input);
 uint8_t rn4871EnterCommandMode(struct rn4871_dev_s *dev);
 
 /*!
+ * \details This API allows to quit command mode for the module.
+ *
+ * \param[in,out] dev : Structure instance of rn4871_dev_s
+ *
+ * \return Result of API execution status
+ * \retval CODE_RETURN_ERROR
+ * \retval CODE_RETURN_SUCCESS
+ */
+uint8_t rn4871QuitCommandMode(struct rn4871_dev_s *dev);
+
+/*!
  * \details This API allows to reboot the module.
  * It is the end point, call this API after using other APIs for configuring
  * the module. The FSM state of module is on IDLE after.

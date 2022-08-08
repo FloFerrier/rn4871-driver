@@ -202,6 +202,26 @@ uint8_t rn4871EnterCommandMode(struct rn4871_dev_s *dev) {
     return ret;
 }
 
+uint8_t rn4871QuitCommandMode(struct rn4871_dev_s *dev) {
+    assert(NULL != dev);
+
+    uint8_t ret = CODE_RETURN_ERROR;
+    char response[BUFFER_UART_LEN_MAX+1] = "";
+    uint16_t responseSize = 0;
+
+    ret = rn4871SendCmd(dev, CMD_MODE_QUIT, NULL);
+    if(CODE_RETURN_SUCCESS != ret)
+        return ret;
+    ret = dev->uartRx(response, &responseSize);
+    if(CODE_RETURN_SUCCESS != ret)
+        return ret;
+    ret = rn4871ResponseProcess(dev, response);
+    if(CODE_RETURN_SUCCESS != ret)
+        return ret;
+
+    return ret;
+}
+
 uint8_t rn4871RebootModule(struct rn4871_dev_s *dev) {
     assert(NULL != dev);
 
