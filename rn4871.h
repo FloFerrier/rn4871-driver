@@ -163,6 +163,18 @@ uint8_t rn4871DumpInfos(struct rn4871_dev_s *dev, char *infos);
  */
 uint8_t rn4871GetMacAddress(struct rn4871_dev_s *dev, char *macAddress);
 
+/*!
+ * \details This API allows to get if services on the module contain the transparent Uart mode.
+ *
+ * \param[in,out] dev : Structure instance of rn4871_dev_s
+ * \param[out]    result : True or False, depending the setting of services.
+ *
+ * \return Result of API execution status
+ * \retval CODE_RETURN_ERROR
+ * \retval CODE_RETURN_SUCCESS
+ */
+uint8_t rn4871IsOnTransparentUart(struct rn4871_dev_s *dev, bool *result);
+
 uint8_t rn4871TransparentUartSendData(struct rn4871_dev_s *dev, uint8_t *pBuffer, uint16_t bufferSize);
 
 /*!

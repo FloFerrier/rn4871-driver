@@ -439,3 +439,19 @@ void rn4871SetForceFsmState(enum rn4871_fsm_e fsmForceState) {
 void rn4871SetForceDataMode(void) {
     _current_mode = DATA_MODE;
 }
+
+uint8_t rn4871IsOnTransparentUart(struct rn4871_dev_s *dev, bool *result) {
+    assert((NULL != dev) || (NULL != result));
+    uint8_t ret = CODE_RETURN_ERROR;
+
+    *result = false;
+    uint16_t services = 0x00;
+    ret = rn4871GetServices(dev, &services);
+    if(CODE_RETURN_SUCCESS != ret)
+        return ret;
+
+    if(UART_TRANSPARENT & services)
+        *result = true;
+
+    return CODE_RETURN_SUCCESS;
+}
