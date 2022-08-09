@@ -15,6 +15,7 @@
 - [ ] Add graphical dependencies on doxygen
 - [ ] Automate generation of HTML report file for test coverage
 - [ ] Improve memory management
+- [ ] Improve log file management with CMake
 - [ ] Improve framework (Doxygen and test coverage location)
 - [ ] Revert commit with Gatt features
 # Bugs
