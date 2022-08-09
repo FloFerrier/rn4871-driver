@@ -1,6 +1,7 @@
 #include "rn4871.h"
 #include "rn4871_defs.h"
 #include "utils.h"
+#include "logs.h"
 
 enum rn4871_mode_e {
     DATA_MODE,
@@ -45,6 +46,7 @@ uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const cha
 	uint8_t ret = CODE_RETURN_ERROR;
 
     if((COMMAND_MODE != _current_mode) && (CMD_MODE_ENTER != cmd)) {
+        logger(LOG_ERROR, "rn4871SendCmd: module is not on command mode ...\r\n");
         return CODE_RETURN_NO_COMMAND_MODE;
     }
 
@@ -92,6 +94,8 @@ uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const cha
     }
     _current_cmd = cmd;
     va_end(args);
+
+    logger(LOG_DEBUG, "rn4871SendCmd: [%d] \"%s\"\r\n", bufferSize, pBuffer);
 
 	return ret;
 }
@@ -261,9 +265,10 @@ uint8_t rn4871SetDeviceName(struct rn4871_dev_s *dev, const char *deviceName, si
     ret = rn4871ResponseProcess(dev, response);
     if(CODE_RETURN_SUCCESS != ret)
         return ret;
-
-    if(0 >= strlen(deviceName))
+    if(0 >= strlen(deviceName)) {
+        logger(LOG_ERROR, "rn4871SetDeviceName: string device name is empty ...\r\n");
         return CODE_RETURN_ERROR;
+    }
 
     return ret;
 }
@@ -276,8 +281,10 @@ uint8_t rn4871GetDeviceName(struct rn4871_dev_s *dev, char *deviceName) {
     uint16_t infosSize = strlen(infos);
     if(CODE_RETURN_SUCCESS != ret)
         return ret;
-    if(0 >= infosSize)
+    if(0 >= infosSize) {
+        logger(LOG_ERROR, "rn4871GetDeviceName: string device name is empty ...\r\n");
         return CODE_RETURN_ERROR;
+    }
 
     rn4871ParseDumpInfos(infos, FIELD_DEVICE_NAME, deviceName);
     return ret;
@@ -331,8 +338,12 @@ uint8_t rn4871DumpInfos(struct rn4871_dev_s *dev, char *infos) {
     if(CODE_RETURN_SUCCESS != ret)
         return ret;
     ret = dev->uartRx(response, &responseSize);
-    if((CODE_RETURN_SUCCESS != ret) || (0 >= responseSize))
+    if(CODE_RETURN_SUCCESS != ret)
+        return ret;
+    if(0 >= responseSize) {
+        logger(LOG_ERROR, "rn4871DumpInfos: string infos is empty ...\r\n");
         return CODE_RETURN_ERROR;
+    }
     ret = rn4871ResponseProcess(dev, response);
     if(CODE_RETURN_SUCCESS != ret)
         return ret;
@@ -354,8 +365,10 @@ void rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, char
         token = strtok_r(NULL, delimiter, &saveptr);
     } while(NULL != token);
 
-    if(NULL == token)
+    if(NULL == token) {
+        logger(LOG_ERROR, "rn4871ParseDumpInfos: string infos is empty ...\r\n");
         return;
+    }
 
     char *tmp;
     tmp = strtok_r(token, "=", &saveptr);
@@ -371,8 +384,10 @@ uint8_t rn4871GetMacAddress(struct rn4871_dev_s *dev, char *macAddress) {
     uint16_t infosSize = strlen(infos);
     if(CODE_RETURN_SUCCESS != ret)
         return ret;
-    if(0 >= infosSize)
+    if(0 >= infosSize) {
+        logger(LOG_ERROR, "rn4871GetMacAddress: string infos is empty ...\r\n");
         return CODE_RETURN_ERROR;
+    }
 
     rn4871ParseDumpInfos(infos, FIELD_MAC_ADDRESS, macAddress);
     return ret;
@@ -386,8 +401,10 @@ uint8_t rn4871GetServices(struct rn4871_dev_s *dev, uint16_t *services) {
     uint16_t infosSize = strlen(infos);
     if(CODE_RETURN_SUCCESS != ret)
         return ret;
-    if(0 >= infosSize)
+    if(0 >= infosSize) {
+        logger(LOG_ERROR, "rn4871GetServices: string infos is empty ...\r\n");
         return CODE_RETURN_ERROR;
+    }
 
     char tmp[BUFFER_UART_LEN_MAX+1] = "";
     rn4871ParseDumpInfos(infos, FIELD_SERVICES, tmp);
@@ -419,13 +436,18 @@ uint8_t rn4871TransparentUartSendData(struct rn4871_dev_s *dev, uint8_t *pBuffer
     assert((NULL != dev) || (NULL != pBuffer));
 
     /* Must on data mode */
-    if(DATA_MODE != _current_mode)
+    if(DATA_MODE != _current_mode) {
+        logger(LOG_ERROR, "rn4871TransparentUartSendData: module is not on DATA mode ...\r\n");
         return CODE_RETURN_NO_DATA_MODE;
+    }
 
     /* Must on streaming state */
-    if(FSM_STATE_STREAMING != rn4871GetFsmState())
+    if(FSM_STATE_STREAMING != rn4871GetFsmState()) {
+        logger(LOG_ERROR, "rn4871TransparentUartSendData: fsm is not on STREAMING mode ...\r\n");
         return CODE_RETURN_NO_STREAMING;
+    }
 
+    logger(LOG_DEBUG, "rn4871TransparentUartSendData: [%d] \"%s\"\r\n", bufferSize, pBuffer);
     return dev->uartTx(pBuffer, &bufferSize);
 }
 
