@@ -31,10 +31,9 @@ enum rn4871_code_return_e {
 };
 
 enum rn4871_cmd_e {
-  CMD_NONE,
   CMD_MODE_ENTER, /* $$$ */
   CMD_MODE_QUIT, /* --- */
-  CMD_REBOOT, /* R,1 */
+  CMD_REBOOT, /* R */
   CMD_RESET_FACTORY, /* SF */
   CMD_SET_BT_NAME, /* S- */
   CMD_SET_DEVICE_NAME, /* SN */
@@ -47,6 +46,7 @@ enum rn4871_cmd_e {
   CMD_CREATE_PRIVATE_CHARACTERISTIC, /* PC */
   CMD_SERVER_WRITE_CHARACTERISTIC, /* SHW */
   CMD_SERVER_READ_CHARACTERISTIC, /* SHR */
+  CMD_NONE,
 };
 
 enum rn4871_fsm_e {
@@ -63,6 +63,25 @@ enum rn4871_service_e {
   UART_TRANSPARENT   = 0x40,
   BEACON             = 0x20,
   RESERVED           = 0x10,
+};
+
+static const char TABLE_COMMAND[][10] = {
+    "$$$",
+    "---",
+    "R",
+    "SF",
+    "S-",
+    "SN",
+    "GN",
+    "SS",
+    "D",
+    "V",
+    "PZ",
+    "PS",
+    "PC",
+    "SHW",
+    "SHR",
+    "",
 };
 
 /*!

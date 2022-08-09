@@ -25,25 +25,6 @@ static const char DUMP_INFOS_FIELD[][10] = {
     "Services=",
 };
 
-static const char TABLE_COMMAND[][10] = {
-    "",
-    "$$$",
-    "---",
-    "R,1",
-    "SF",
-    "S-",
-    "SN",
-    "GN",
-    "SS",
-    "D",
-    "V",
-    "PZ",
-    "PS",
-    "PC",
-    "SHW",
-    "SHR",
-};
-
 static enum rn4871_mode_e _current_mode = DATA_MODE;
 static enum rn4871_cmd_e _current_cmd = CMD_NONE;
 static enum rn4871_fsm_e _fsm_state = FSM_STATE_NONE;
@@ -80,7 +61,6 @@ uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const cha
             break;
         }
         case CMD_MODE_QUIT:
-        case CMD_REBOOT:
         case CMD_DUMP_INFOS:
         case CMD_GET_DEVICE_NAME:
         case CMD_GET_VERSION:
@@ -90,6 +70,7 @@ uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const cha
             break;
         }
         /* Commands with arguments */
+        case CMD_REBOOT :
 		case CMD_RESET_FACTORY :
         case CMD_SET_SERVICES:
         case CMD_SET_DEVICE_NAME:
@@ -230,7 +211,7 @@ uint8_t rn4871RebootModule(struct rn4871_dev_s *dev) {
     char proceededResponse[BUFFER_UART_LEN_MAX+1] = "";
     uint16_t responseSize = 0;
 
-    ret = rn4871SendCmd(dev, CMD_REBOOT, NULL);
+    ret = rn4871SendCmd(dev, CMD_REBOOT, "1");
     if(CODE_RETURN_SUCCESS != ret)
         return ret;
     ret = dev->uartRx(response, &responseSize);
