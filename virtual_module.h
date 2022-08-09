@@ -30,7 +30,7 @@
  * \param[in] inputSize : Size of elements on the buffer pInput.
  *
  */
-void uartRxVirtualModule(const uint8_t *pInput, const uint16_t inputSize);
+void virtualModuleReceiveData(const uint8_t *pInput, const uint16_t inputSize);
 
 /*!
  * \details This API allows to emulate UART Tx on the virtual module.
@@ -39,11 +39,12 @@ void uartRxVirtualModule(const uint8_t *pInput, const uint16_t inputSize);
  * \param[out] outputSize : Size of elements on the buffer pOutput.
  *
  */
-void uartTxVirtualModule(uint8_t *pOutput, uint16_t *outputSize);
+void virtualModuleSendData(uint8_t *pOutput, uint16_t *outputSize);
 
 void virtualModuleConnect(struct rn4871_dev_s *dev);
 void virtualModuleStream(struct rn4871_dev_s *dev);
 void virtualModuleDisconnect(struct rn4871_dev_s *dev);
+void virtualModuleSetForceDataMode(void);
 
 #endif /* VIRTUAL_MODULE__H */
  /**@}*/
