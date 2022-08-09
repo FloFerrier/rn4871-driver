@@ -1,5 +1,6 @@
 #include "virtual_module.h"
 #include "utils.h"
+#include "logs.h"
 
 #define BUFFER_MAX_LEN (255)
 
@@ -31,8 +32,10 @@ static enum rn4871_cmd_e getCommand(char *command) {
     char *token = strtok_r(command, delimiter, &saveptr);
     for(int i=0; i< CMD_NONE; i++) {
         if(NULL != token) {
-            if(0 == strcmp(token, TABLE_COMMAND[i]))
+            if(0 == strcmp(token, TABLE_COMMAND[i])) {
+                logger(LOG_DEBUG, "getCommand: find command %s\r\n", TABLE_COMMAND[i]);
                 return i;
+            }
         }
     }
     return CMD_NONE;
@@ -46,12 +49,15 @@ static char *parseArgCommand(char *command) {
     char *token = strtok_r(command, delimiter, &saveptr);
     if(NULL != token) {
         token = strtok_r(NULL, delimiter, &saveptr);
+        logger(LOG_DEBUG, "parseArgCommand: find arg %s\r\n", token);
         return token;
     }
 }
 
 void virtualModuleReceiveData(const uint8_t *pInput, const uint16_t inputSize) {
     assert(NULL != pInput);
+
+    logger(LOG_DEBUG, "virtualModuleReceiveData: [%d] \"%s\"\r\n", inputSize, pInput);
 
     memset(pGlobalBuffer, '\0', BUFFER_MAX_LEN);
     memset(tmpBuffer, '\0', BUFFER_MAX_LEN);
@@ -129,7 +135,7 @@ void virtualModuleSendData(uint8_t *pOutput, uint16_t *outputSize) {
 
     strncpy(pOutput, pGlobalBuffer, BUFFER_MAX_LEN);
     *outputSize = strnlen(pGlobalBuffer, BUFFER_MAX_LEN);
-    //printf("[VM Send] [%d] \"%s\"\r\n", *outputSize, pGlobalBuffer);
+    logger(LOG_DEBUG, "virtualModuleSendData: [%d] \"%s\"\r\n", *outputSize, pOutput);
 }
 
 void virtualModuleConnect(struct rn4871_dev_s *dev) {
