@@ -88,11 +88,11 @@ static const char TABLE_COMMAND[][10] = {
  * \details Function template to add by customer for communicating through UART (depending on target board/system).
  * \note UART = Universal Asynchronous Receiver and Transmitter
  * 
- * \param[in,out] pBuffer    : Buffer that contains elements to receive/transmit by the module.
- * \param[in,out] bufferSize : Size of elements on the buffer pBuffer.
+ * \param[in,out] buffer    : Buffer that contains elements to receive/transmit by the module.
+ * \param[in,out] bufferLen : Size of elements on the buffer pBuffer.
  *
  */
-typedef uint8_t (*rn4871_com_fptr_t)(uint8_t *pBuffer, uint16_t *bufferSize);
+typedef uint8_t (*rn4871_com_fptr_t)(char *buffer, uint16_t *bufferLen);
 
 /*!
  * \details Function template to add by customer for waiting a delay (depending on target board/system). 

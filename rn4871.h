@@ -100,13 +100,13 @@ uint8_t rn4871SetServices(struct rn4871_dev_s *dev, uint16_t service);
  *
  * \param[in,out] dev : Structure instance of rn4871_dev_s.
  * \param[in]     deviceName : Buffer that contains device name.
- * \param[in]     sizeDeviceName : Size of previous deviceName buffer.
+ * \param[in]     deviceNameLen : Size of previous deviceName buffer.
  *
  * \return Result of API execution status
  * \retval CODE_RETURN_ERROR
  * \retval CODE_RETURN_SUCCESS
  */
-uint8_t rn4871SetDeviceName(struct rn4871_dev_s *dev, const char *deviceName, size_t sizeDeviceName);
+uint8_t rn4871SetDeviceName(struct rn4871_dev_s *dev, const char *deviceName, uint16_t deviceNameLen);
 
 /*!
  * \details This API allows to erase all GATT services on the module.
@@ -202,14 +202,14 @@ uint8_t rn4871IsOnTransparentUart(struct rn4871_dev_s *dev, bool *result);
  * \details This API allows to send data on Transparent Uart mode.
  *
  * \param[in,out] dev : Structure instance of rn4871_dev_s.
- * \param[in]     pBuffer : Buffer to send.
- * \param[in]     bufferSize : Size of buffer to send.
+ * \param[in]     dataToSend : Buffer to send.
+ * \param[in]     dataToSendLen : Size of buffer to send.
  *
  * \return Result of API execution status
  * \retval CODE_RETURN_ERROR
  * \retval CODE_RETURN_SUCCESS
  */
-uint8_t rn4871TransparentUartSendData(struct rn4871_dev_s *dev, uint8_t *pBuffer, uint16_t bufferSize);
+uint8_t rn4871TransparentUartSendData(struct rn4871_dev_s *dev, const char *dataToSend, uint16_t dataToSendLen);
 
 /*!
  * \details This API allows to get the FSM state for the module (software FSM).

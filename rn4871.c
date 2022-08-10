@@ -26,9 +26,9 @@ static const char DUMP_INFOS_FIELD[][10] = {
     "Services=",
 };
 
-static enum rn4871_mode_e _current_mode = DATA_MODE;
-static enum rn4871_cmd_e _current_cmd = CMD_NONE;
-static enum rn4871_fsm_e _fsm_state = FSM_STATE_NONE;
+static enum rn4871_mode_e _currentMode = DATA_MODE;
+static enum rn4871_cmd_e _currentCmd = CMD_NONE;
+static enum rn4871_fsm_e _fsmState = FSM_STATE_NONE;
 
 static uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const char *format, ...);
 static void rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, char *result);
@@ -41,11 +41,11 @@ uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const cha
     if(NULL != format)
         va_start(args, format);
 
-	uint8_t pBuffer[BUFFER_UART_LEN_MAX+1] = "";
-	uint16_t bufferSize = 0;
+	uint8_t command[BUFFER_UART_LEN_MAX+1] = "";
+	uint16_t commandLen = 0;
 	uint8_t ret = CODE_RETURN_ERROR;
 
-    if((COMMAND_MODE != _current_mode) && (CMD_MODE_ENTER != cmd)) {
+    if((COMMAND_MODE != _currentMode) && (CMD_MODE_ENTER != cmd)) {
         logger(LOG_ERROR, "rn4871SendCmd: module is not on command mode ...\r\n");
         va_end(args);
         return CODE_RETURN_NO_COMMAND_MODE;
@@ -54,13 +54,13 @@ uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const cha
     switch(cmd) {
         /* Commands without argument */
 		case CMD_MODE_ENTER: {
-            pBuffer[0] = '$';
-            bufferSize = 1;
-            ret = dev->uartTx(pBuffer, &bufferSize);
+            command[0] = '$';
+            commandLen = 1;
+            ret = dev->uartTx(command, &commandLen);
             dev->delayMs(100);
-            ret = dev->uartTx(pBuffer, &bufferSize);
+            ret = dev->uartTx(command, &commandLen);
             dev->delayMs(100);
-            ret = dev->uartTx(pBuffer, &bufferSize);
+            ret = dev->uartTx(command, &commandLen);
             break;
         }
         case CMD_MODE_QUIT:
@@ -68,8 +68,8 @@ uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const cha
         case CMD_GET_DEVICE_NAME:
         case CMD_GET_VERSION:
         case CMD_CLEAR_ALL_SERVICES: {
-            bufferSize = snprintf(pBuffer, BUFFER_UART_LEN_MAX, "%s\r\n", TABLE_COMMAND[cmd]);
-            ret = dev->uartTx(pBuffer, &bufferSize);
+            commandLen = snprintf(command, BUFFER_UART_LEN_MAX, "%s\r\n", TABLE_COMMAND[cmd]);
+            ret = dev->uartTx(command, &commandLen);
             break;
         }
         /* Commands with arguments */
@@ -84,8 +84,8 @@ uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const cha
         case CMD_CREATE_PRIVATE_CHARACTERISTIC: {
             uint8_t pArgs[BUFFER_UART_LEN_MAX] = "";
             vsnprintf(pArgs, BUFFER_UART_LEN_MAX, format, args);
-			bufferSize = snprintf(pBuffer, BUFFER_UART_LEN_MAX, "%s,%s\r\n", TABLE_COMMAND[cmd], pArgs);
-            ret = dev->uartTx(pBuffer, &bufferSize);
+			commandLen = snprintf(command, BUFFER_UART_LEN_MAX, "%s,%s\r\n", TABLE_COMMAND[cmd], pArgs);
+            ret = dev->uartTx(command, &commandLen);
 			break;
         }
         /* Unknown command */
@@ -93,37 +93,37 @@ uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const cha
 			ret = CODE_RETURN_CMD_UNKNOWN;
         	break;
     }
-    _current_cmd = cmd;
+    _currentCmd = cmd;
     va_end(args);
 
-    logger(LOG_DEBUG, "rn4871SendCmd: [%d] \"%s\"\r\n", bufferSize, pBuffer);
+    logger(LOG_DEBUG, "rn4871SendCmd: [%d] \"%s\"\r\n", commandLen, command);
 
 	return ret;
 }
 
-uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *input) {
-    assert((NULL != dev) || (NULL != input));
+uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *response) {
+    assert((NULL != dev) || (NULL != response));
 
 	uint8_t ret = CODE_RETURN_ERROR;
-    enum rn4871_cmd_e cmd = _current_cmd;
+    enum rn4871_cmd_e cmd = _currentCmd;
 
-    if((NULL != strstr(input, "AOK")) || (NULL != strstr(input, "CMD>")) || (NULL != strstr(input, "REBOOT"))) {
-        _fsm_state = FSM_STATE_INIT;
+    if((NULL != strstr(response, "AOK")) || (NULL != strstr(response, "CMD>")) || (NULL != strstr(response, "REBOOT"))) {
+        _fsmState = FSM_STATE_INIT;
 
         /* Check if error is returned */
-        if(NULL != strstr(input, "Err"))
+        if(NULL != strstr(response, "Err"))
             ret = CODE_RETURN_ERROR;
         /* Parse and get data from response */
         else {
             switch(cmd) {
                 case CMD_MODE_ENTER: {
                     ret = CODE_RETURN_SUCCESS;
-                    _current_mode = COMMAND_MODE;
+                    _currentMode = COMMAND_MODE;
                     break;
                 }
                 case CMD_MODE_QUIT: {
                     ret = CODE_RETURN_SUCCESS;
-                    _current_mode = DATA_MODE;
+                    _currentMode = DATA_MODE;
                     break;
                 }
                 case CMD_SET_BT_NAME:
@@ -142,8 +142,8 @@ uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *input) {
                 }
                 case CMD_REBOOT:
                 case CMD_RESET_FACTORY: {
-                    _fsm_state = FSM_STATE_IDLE;
-                    _current_mode = DATA_MODE;
+                    _fsmState = FSM_STATE_IDLE;
+                    _currentMode = DATA_MODE;
                     ret = CODE_RETURN_SUCCESS;
                     break;
                 }
@@ -153,16 +153,16 @@ uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *input) {
             }
         }
     }
-    else if(NULL != strstr(input, "STREAM_OPEN")) {
-        _fsm_state = FSM_STATE_STREAMING;
+    else if(NULL != strstr(response, "STREAM_OPEN")) {
+        _fsmState = FSM_STATE_STREAMING;
 		ret = CODE_RETURN_SUCCESS;
     }
-    else if(NULL != strstr(input, "DISCONNECT")) {
-        _fsm_state = FSM_STATE_IDLE;
+    else if(NULL != strstr(response, "DISCONNECT")) {
+        _fsmState = FSM_STATE_IDLE;
 		ret = CODE_RETURN_SUCCESS;
     }
-    else if(NULL != strstr(input, "CONNECT")) {
-        _fsm_state = FSM_STATE_CONNECTED;
+    else if(NULL != strstr(response, "CONNECT")) {
+        _fsmState = FSM_STATE_CONNECTED;
 		ret = CODE_RETURN_SUCCESS;
     }
 	return ret;
@@ -226,7 +226,7 @@ uint8_t rn4871RebootModule(struct rn4871_dev_s *dev) {
     if(CODE_RETURN_SUCCESS != ret)
         return ret;
 
-    _fsm_state = FSM_STATE_IDLE;
+    _fsmState = FSM_STATE_IDLE;
     return ret;
 }
 
@@ -250,8 +250,8 @@ uint8_t rn4871SetServices(struct rn4871_dev_s *dev, uint16_t service) {
     return ret;
 }
 
-uint8_t rn4871SetDeviceName(struct rn4871_dev_s *dev, const char *deviceName, size_t sizeDeviceName) {
-    assert((NULL != dev) || (NULL != deviceName) || (DEVICE_NAME_CHARACTER_MAX >= sizeDeviceName));
+uint8_t rn4871SetDeviceName(struct rn4871_dev_s *dev, const char *deviceName, uint16_t deviceNameLen) {
+    assert((NULL != dev) || (NULL != deviceName) || (DEVICE_NAME_CHARACTER_MAX >= deviceNameLen));
 
     uint8_t ret = CODE_RETURN_ERROR;
     char response[BUFFER_UART_LEN_MAX+1] = "";
@@ -433,11 +433,11 @@ uint8_t rn4871EraseAllGattServices(struct rn4871_dev_s *dev) {
     return ret;
 }
 
-uint8_t rn4871TransparentUartSendData(struct rn4871_dev_s *dev, uint8_t *pBuffer, uint16_t bufferSize) {
-    assert((NULL != dev) || (NULL != pBuffer));
+uint8_t rn4871TransparentUartSendData(struct rn4871_dev_s *dev, const char *dataToSend, uint16_t dataToSendLen) {
+    assert((NULL != dev) || (NULL != dataToSend));
 
     /* Must on data mode */
-    if(DATA_MODE != _current_mode) {
+    if(DATA_MODE != _currentMode) {
         logger(LOG_ERROR, "rn4871TransparentUartSendData: module is not on DATA mode ...\r\n");
         return CODE_RETURN_NO_DATA_MODE;
     }
@@ -448,20 +448,20 @@ uint8_t rn4871TransparentUartSendData(struct rn4871_dev_s *dev, uint8_t *pBuffer
         return CODE_RETURN_NO_STREAMING;
     }
 
-    logger(LOG_DEBUG, "rn4871TransparentUartSendData: [%d] \"%s\"\r\n", bufferSize, pBuffer);
-    return dev->uartTx(pBuffer, &bufferSize);
+    logger(LOG_DEBUG, "rn4871TransparentUartSendData: [%d] \"%s\"\r\n", dataToSendLen, dataToSend);
+    return dev->uartTx((char*)dataToSend, &dataToSendLen);
 }
 
 enum rn4871_fsm_e rn4871GetFsmState(void) {
-    return _fsm_state;
+    return _fsmState;
 }
 
 void rn4871SetForceFsmState(enum rn4871_fsm_e fsmForceState) {
-    _fsm_state = fsmForceState;
+    _fsmState = fsmForceState;
 }
 
 void rn4871SetForceDataMode(void) {
-    _current_mode = DATA_MODE;
+    _currentMode = DATA_MODE;
 }
 
 uint8_t rn4871IsOnTransparentUart(struct rn4871_dev_s *dev, bool *result) {

@@ -26,20 +26,20 @@
 /*!
  * \details This API allows to emulate UART Rx on the virtual module.
  *
- * \param[in] pInput    : Buffer that contains elements to receive by the module.
- * \param[in] inputSize : Size of elements on the buffer pInput.
+ * \param[in] dataReceived    : Buffer that contains elements to receive by the module.
+ * \param[in] dataReceivedLen : Size of elements on the buffer.
  *
  */
-void virtualModuleReceiveData(const uint8_t *pInput, const uint16_t inputSize);
+void virtualModuleReceiveData(char *dataReceived, uint16_t dataReceivedLen);
 
 /*!
  * \details This API allows to emulate UART Tx on the virtual module.
  *
- * \param[out] pOutput    : Buffer that contains elements to transmit by the module.
- * \param[out] outputSize : Size of elements on the buffer pOutput.
+ * \param[out] dataToSend    : Buffer that contains elements to transmit by the module.
+ * \param[out] dataToSendLen : Size of elements on the buffer.
  *
  */
-void virtualModuleSendData(uint8_t *pOutput, uint16_t *outputSize);
+void virtualModuleSendData(char *dataToSend, uint16_t *dataToSendLen);
 
 /*!
  * \details This API allows to emulate a connection message send by the module.

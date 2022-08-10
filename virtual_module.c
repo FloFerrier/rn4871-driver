@@ -54,17 +54,17 @@ static char *parseArgCommand(char *command) {
     }
 }
 
-void virtualModuleReceiveData(const uint8_t *pInput, const uint16_t inputSize) {
-    assert(NULL != pInput);
+void virtualModuleReceiveData(char *dataReceived, uint16_t dataReceivedLen) {
+    assert(NULL != dataReceived);
 
-    logger(LOG_DEBUG, "virtualModuleReceiveData: [%d] \"%s\"\r\n", inputSize, pInput);
+    logger(LOG_DEBUG, "virtualModuleReceiveData: [%d] \"%s\"\r\n", dataReceivedLen, dataReceived);
 
     memset(pGlobalBuffer, '\0', BUFFER_MAX_LEN);
     memset(tmpBuffer, '\0', BUFFER_MAX_LEN);
     static uint8_t cnt_cmd_mode = 0;
     if(_command_mode) {
         char *arg;
-        strncpy(tmpBuffer, (char*)pInput, BUFFER_MAX_LEN);
+        strncpy(tmpBuffer, dataReceived, BUFFER_MAX_LEN);
         enum rn4871_cmd_e command = getCommand(tmpBuffer);
         if(CMD_NONE != command) {
             switch(command) {
@@ -98,13 +98,13 @@ void virtualModuleReceiveData(const uint8_t *pInput, const uint16_t inputSize) {
                     break;
                 }
                 case CMD_SET_SERVICES: {
-                    arg = parseArgCommand((char*)pInput);
+                    arg = parseArgCommand(dataReceived);
                     virtualModule.services = (uint16_t)strtol(arg, NULL, 16);
                     snprintf(pGlobalBuffer, BUFFER_MAX_LEN, "AOK\r\nCMD>");
                     break;
                 }
                 case CMD_SET_DEVICE_NAME: {
-                    arg = parseArgCommand((char*)pInput);
+                    arg = parseArgCommand(dataReceived);
                     if(BUFFER_MAX_LEN >= strlen(arg)) {
                         strcpy(virtualModule.moduleName, arg);
                     }
@@ -120,7 +120,7 @@ void virtualModuleReceiveData(const uint8_t *pInput, const uint16_t inputSize) {
             snprintf(pGlobalBuffer, BUFFER_MAX_LEN, "Err\r\nCMD>");
         }
     }
-    else if(0 == strcmp(pInput, "$")) {
+    else if(0 == strcmp(dataReceived, "$")) {
         ++cnt_cmd_mode;
         if (3 == cnt_cmd_mode) {
             snprintf(pGlobalBuffer, BUFFER_MAX_LEN, "CMD>");
@@ -130,12 +130,12 @@ void virtualModuleReceiveData(const uint8_t *pInput, const uint16_t inputSize) {
     }
 }
 
-void virtualModuleSendData(uint8_t *pOutput, uint16_t *outputSize) {
-    assert((NULL != pOutput) || (NULL != outputSize));
+void virtualModuleSendData(char *dataToSend, uint16_t *dataToSendLen) {
+    assert((NULL != dataToSend) || (NULL != dataToSendLen));
 
-    strncpy(pOutput, pGlobalBuffer, BUFFER_MAX_LEN);
-    *outputSize = strnlen(pGlobalBuffer, BUFFER_MAX_LEN);
-    logger(LOG_DEBUG, "virtualModuleSendData: [%d] \"%s\"\r\n", *outputSize, pOutput);
+    strncpy(dataToSend, pGlobalBuffer, BUFFER_MAX_LEN);
+    *dataToSendLen = strnlen(pGlobalBuffer, BUFFER_MAX_LEN);
+    logger(LOG_DEBUG, "virtualModuleSendData: [%d] \"%s\"\r\n", *dataToSendLen, dataToSend);
 }
 
 void virtualModuleConnect(struct rn4871_dev_s *dev) {
