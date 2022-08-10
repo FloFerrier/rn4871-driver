@@ -47,6 +47,7 @@ uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const cha
 
     if((COMMAND_MODE != _current_mode) && (CMD_MODE_ENTER != cmd)) {
         logger(LOG_ERROR, "rn4871SendCmd: module is not on command mode ...\r\n");
+        va_end(args);
         return CODE_RETURN_NO_COMMAND_MODE;
     }
 
