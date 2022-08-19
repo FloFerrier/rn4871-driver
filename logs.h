@@ -15,9 +15,9 @@
 #define LOG_BUFFER_LEN_MAX 255
 
 enum log_level_e {
-    LOG_ERROR = (1 << 0),
-    LOG_DEBUG = (1 << 1),
-    LOG_INFO  = (1 << 2),
+    LOG_ERROR = 0x1,
+    LOG_DEBUG = 0x2,
+    LOG_INFO  = 0x4,
 };
 
 /*!
