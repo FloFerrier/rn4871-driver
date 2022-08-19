@@ -1,7 +1,6 @@
 #include "logs.h"
 
 #include <assert.h>
-#include <stddef.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>

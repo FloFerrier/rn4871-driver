@@ -222,7 +222,6 @@ uint8_t rn4871RebootModule(struct rn4871_dev_s *dev) {
 
     uint8_t ret = CODE_RETURN_ERROR;
     char response[BUFFER_UART_LEN_MAX+1] = "";
-    char proceededResponse[BUFFER_UART_LEN_MAX+1] = "";
     uint16_t responseSize = 0;
 
     ret = rn4871SendCmd(dev, CMD_REBOOT, "1");
