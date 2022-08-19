@@ -49,7 +49,9 @@ uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const cha
 
     if((COMMAND_MODE != _currentMode) && (CMD_MODE_ENTER != cmd)) {
         logger(LOG_ERROR, "rn4871SendCmd: module is not on command mode ...\r\n");
-        va_end(args);
+        if(NULL != format) {
+            va_end(args);
+        }
         return CODE_RETURN_NO_COMMAND_MODE;
     }
 
@@ -75,8 +77,8 @@ uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const cha
             break;
         }
         /* Commands with arguments */
-        case CMD_REBOOT :
-		case CMD_RESET_FACTORY :
+        case CMD_REBOOT:
+		case CMD_RESET_FACTORY:
         case CMD_SET_SERVICES:
         case CMD_SET_DEVICE_NAME:
 		case CMD_SET_BT_NAME:
@@ -96,7 +98,9 @@ uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const cha
         	break;
     }
     _currentCmd = cmd;
-    va_end(args);
+    if(NULL != format) {
+        va_end(args);
+    }
 
     logger(LOG_DEBUG, "rn4871SendCmd: [%d] \"%s\"\r\n", commandLen, command);
 
