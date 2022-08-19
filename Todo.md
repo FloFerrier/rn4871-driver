@@ -24,3 +24,4 @@
 - [X] Get firmware version : incorrect parsing
 => Fix: a specific function parse the whole response string to extract data
 - [X] rn4871SetServices doesn't modify internal value on virtual module
+- [ ] Potential Risk: If sequence "$$$" is not properly done due to hardware module
