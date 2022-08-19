@@ -38,8 +38,9 @@ uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const cha
     assert(NULL != dev);
 
     va_list args;
-    if(NULL != format)
+    if(NULL != format) {
         va_start(args, format);
+    }
 
 	uint8_t command[BUFFER_UART_LEN_MAX+1] = "";
 	uint16_t commandLen = 0;
@@ -111,8 +112,9 @@ uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *response) {
         _fsmState = FSM_STATE_INIT;
 
         /* Check if error is returned */
-        if(NULL != strstr(response, "Err"))
+        if(NULL != strstr(response, "Err")) {
             ret = CODE_RETURN_ERROR;
+        }
         /* Parse and get data from response */
         else {
             switch(cmd) {
@@ -176,14 +178,17 @@ uint8_t rn4871EnterCommandMode(struct rn4871_dev_s *dev) {
     uint16_t responseSize = 0;
 
     ret = rn4871SendCmd(dev, CMD_MODE_ENTER, NULL);
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS != ret) {
         return ret;
+    }
     ret = dev->uartRx(response, &responseSize);
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS != ret) {
         return ret;
+    }
     ret = rn4871ResponseProcess(dev, response);
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS != ret) {
         return ret;
+    }
 
     return ret;
 }
@@ -196,14 +201,17 @@ uint8_t rn4871QuitCommandMode(struct rn4871_dev_s *dev) {
     uint16_t responseSize = 0;
 
     ret = rn4871SendCmd(dev, CMD_MODE_QUIT, NULL);
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS != ret) {
         return ret;
+    }
     ret = dev->uartRx(response, &responseSize);
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS != ret) {
         return ret;
+    }
     ret = rn4871ResponseProcess(dev, response);
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS != ret) {
         return ret;
+    }
 
     return ret;
 }
@@ -217,14 +225,17 @@ uint8_t rn4871RebootModule(struct rn4871_dev_s *dev) {
     uint16_t responseSize = 0;
 
     ret = rn4871SendCmd(dev, CMD_REBOOT, "1");
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS != ret) {
         return ret;
+    }
     ret = dev->uartRx(response, &responseSize);
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS != ret) {
         return ret;
+    }
     ret = rn4871ResponseProcess(dev, response);
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS != ret) {
         return ret;
+    }
 
     _fsmState = FSM_STATE_IDLE;
     return ret;
@@ -238,14 +249,17 @@ uint8_t rn4871SetServices(struct rn4871_dev_s *dev, uint16_t service) {
     uint16_t responseSize = 0;
 
     ret = rn4871SendCmd(dev, CMD_SET_SERVICES, "%X", service);
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS != ret) {
         return ret;
+    }
     ret = dev->uartRx(response, &responseSize);
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS != ret) {
         return ret;
+    }
     ret = rn4871ResponseProcess(dev, response);
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS != ret) {
         return ret;
+    }
 
     return ret;
 }
@@ -258,14 +272,17 @@ uint8_t rn4871SetDeviceName(struct rn4871_dev_s *dev, const char *deviceName, ui
     uint16_t responseSize = 0;
 
     ret = rn4871SendCmd(dev, CMD_SET_DEVICE_NAME, deviceName);
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS != ret) {
         return ret;
+    }
     ret = dev->uartRx(response, &responseSize);
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS != ret) {
         return ret;
+    }
     ret = rn4871ResponseProcess(dev, response);
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS != ret) {
         return ret;
+    }
     if(0 >= strlen(deviceName)) {
         logger(LOG_ERROR, "rn4871SetDeviceName: string device name is empty ...\r\n");
         return CODE_RETURN_ERROR;
@@ -280,8 +297,9 @@ uint8_t rn4871GetDeviceName(struct rn4871_dev_s *dev, char *deviceName) {
     char infos[BUFFER_UART_LEN_MAX+1] = "";
     uint8_t ret = rn4871DumpInfos(dev, infos);
     uint16_t infosSize = strlen(infos);
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS != ret) {
         return ret;
+    }
     if(0 >= infosSize) {
         logger(LOG_ERROR, "rn4871GetDeviceName: string device name is empty ...\r\n");
         return CODE_RETURN_ERROR;
@@ -315,14 +333,17 @@ uint8_t rn4871GetFirmwareVersion(struct rn4871_dev_s *dev, char *firmwareVersion
     uint16_t responseSize = 0;
 
     ret = rn4871SendCmd(dev, CMD_GET_VERSION, NULL);
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS != ret) {
         return ret;
+    }
     ret = dev->uartRx(response, &responseSize);
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS != ret) {
         return ret;
+    }
     ret = rn4871ResponseProcess(dev, response);
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS != ret) {
         return ret;
+    }
 
     rn4871ParseFirmwareVersion(response, firmwareVersion);
     return ret;
@@ -336,18 +357,21 @@ uint8_t rn4871DumpInfos(struct rn4871_dev_s *dev, char *infos) {
     uint16_t responseSize = 0;
 
     ret = rn4871SendCmd(dev, CMD_DUMP_INFOS, NULL);
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS != ret) {
         return ret;
+    }
     ret = dev->uartRx(response, &responseSize);
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS != ret) {
         return ret;
+    }
     if(0 >= responseSize) {
         logger(LOG_ERROR, "rn4871DumpInfos: string infos is empty ...\r\n");
         return CODE_RETURN_ERROR;
     }
     ret = rn4871ResponseProcess(dev, response);
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS != ret) {
         return ret;
+    }
 
     strncpy(infos, response, BUFFER_UART_LEN_MAX);
     return ret;
@@ -383,8 +407,9 @@ uint8_t rn4871GetMacAddress(struct rn4871_dev_s *dev, char *macAddress) {
     char infos[BUFFER_UART_LEN_MAX+1] = "";
     uint8_t ret = rn4871DumpInfos(dev, infos);
     uint16_t infosSize = strlen(infos);
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS != ret) {
         return ret;
+    }
     if(0 >= infosSize) {
         logger(LOG_ERROR, "rn4871GetMacAddress: string infos is empty ...\r\n");
         return CODE_RETURN_ERROR;
@@ -400,8 +425,9 @@ uint8_t rn4871GetServices(struct rn4871_dev_s *dev, uint16_t *services) {
     char infos[BUFFER_UART_LEN_MAX+1] = "";
     uint8_t ret = rn4871DumpInfos(dev, infos);
     uint16_t infosSize = strlen(infos);
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS != ret) {
         return ret;
+    }
     if(0 >= infosSize) {
         logger(LOG_ERROR, "rn4871GetServices: string infos is empty ...\r\n");
         return CODE_RETURN_ERROR;
@@ -421,14 +447,17 @@ uint8_t rn4871EraseAllGattServices(struct rn4871_dev_s *dev) {
     uint16_t responseSize = 0;
 
     ret = rn4871SendCmd(dev, CMD_CLEAR_ALL_SERVICES, NULL);
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS != ret) {
         return ret;
+    }
     ret = dev->uartRx(response, &responseSize);
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS != ret) {
         return ret;
+    }
     ret = rn4871ResponseProcess(dev, response);
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS != ret) {
         return ret;
+    }
 
     return ret;
 }
@@ -471,11 +500,13 @@ uint8_t rn4871IsOnTransparentUart(struct rn4871_dev_s *dev, bool *result) {
     *result = false;
     uint16_t services = 0x00;
     ret = rn4871GetServices(dev, &services);
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS != ret) {
         return ret;
+    }
 
-    if(UART_TRANSPARENT & services)
+    if(UART_TRANSPARENT & services) {
         *result = true;
+    }
 
     return CODE_RETURN_SUCCESS;
 }
