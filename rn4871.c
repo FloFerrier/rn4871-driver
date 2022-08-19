@@ -44,7 +44,7 @@ uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const cha
         va_start(args, format);
     }
 
-	uint8_t command[BUFFER_UART_LEN_MAX+1] = "";
+	char command[BUFFER_UART_LEN_MAX+1] = "";
 	uint16_t commandLen = 0;
 	uint8_t ret = CODE_RETURN_ERROR;
 
@@ -85,7 +85,7 @@ uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const cha
         case CMD_SERVER_READ_CHARACTERISTIC:
         case CMD_SERVER_WRITE_CHARACTERISTIC:
         case CMD_CREATE_PRIVATE_CHARACTERISTIC: {
-            uint8_t pArgs[BUFFER_UART_LEN_MAX] = "";
+            char pArgs[BUFFER_UART_LEN_MAX] = "";
             vsnprintf(pArgs, BUFFER_UART_LEN_MAX, format, args);
 			commandLen = snprintf(command, BUFFER_UART_LEN_MAX, "%s,%s\r\n", TABLE_COMMAND[cmd], pArgs);
             ret = dev->uartTx(command, &commandLen);
