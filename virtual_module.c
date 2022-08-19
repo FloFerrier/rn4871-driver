@@ -52,6 +52,7 @@ static char *parseArgCommand(char *command) {
         logger(LOG_DEBUG, "parseArgCommand: find arg %s\r\n", token);
         return token;
     }
+    return NULL;
 }
 
 void virtualModuleReceiveData(char *dataReceived, uint16_t dataReceivedLen) {
