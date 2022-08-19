@@ -3,6 +3,7 @@
 #include "logs.h"
 
 #define RN4871_DELAY_TO_RESPECT_MS 100
+#define BASE_HEXADECIMAL 16
 
 enum rn4871_mode_e {
     DATA_MODE,
@@ -439,7 +440,7 @@ uint8_t rn4871GetServices(struct rn4871_dev_s *dev, uint16_t *services) {
 
     char tmp[BUFFER_UART_LEN_MAX+1] = "";
     rn4871ParseDumpInfos(infos, FIELD_SERVICES, tmp);
-    *services = (uint16_t)strtol(tmp, NULL, 16);
+    *services = (uint16_t)strtol(tmp, NULL, BASE_HEXADECIMAL);
     return ret;
 }
 

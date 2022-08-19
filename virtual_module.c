@@ -2,11 +2,14 @@
 #include "logs.h"
 
 #define BUFFER_MAX_LEN (255)
+#define MODULE_NAME_LEN (21)
+#define MAC_ADDRESS_LEN (25)
+#define FIRMWARE_VERSION_LEN (5)
 
 struct virtual_module_s {
-    char moduleName[21];
-    char macAddress[25];
-    char firmwareVersion[5];
+    char moduleName[MODULE_NAME_LEN+1];
+    char macAddress[MAC_ADDRESS_LEN+1];
+    char firmwareVersion[FIRMWARE_VERSION_LEN+1];
     uint16_t services;
 };
 
@@ -14,7 +17,7 @@ struct virtual_module_s virtualModule = {
     .moduleName = "RN4871-VM",
     .macAddress = "001122334455",
     .firmwareVersion = "V1.40",
-    .services = 0x80,
+    .services = DEVICE_INFORMATION,
 };
 
 char pGlobalBuffer[BUFFER_MAX_LEN+1] = "";
