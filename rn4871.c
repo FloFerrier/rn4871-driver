@@ -3,6 +3,8 @@
 #include "utils.h"
 #include "logs.h"
 
+#define RN4871_DELAY_TO_RESPECT_MS 100
+
 enum rn4871_mode_e {
     DATA_MODE,
     COMMAND_MODE,
@@ -58,9 +60,9 @@ uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const cha
             command[0] = '$';
             commandLen = 1;
             ret = dev->uartTx(command, &commandLen);
-            dev->delayMs(100);
+            dev->delayMs(RN4871_DELAY_TO_RESPECT_MS);
             ret = dev->uartTx(command, &commandLen);
-            dev->delayMs(100);
+            dev->delayMs(RN4871_DELAY_TO_RESPECT_MS);
             ret = dev->uartTx(command, &commandLen);
             break;
         }
