@@ -1,5 +1,4 @@
 #include "virtual_module.h"
-#include "utils.h"
 #include "logs.h"
 
 #define BUFFER_MAX_LEN (255)

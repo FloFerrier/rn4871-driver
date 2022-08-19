@@ -26,8 +26,6 @@ set(SOURCE_FILES
 	rn4871.h
 	virtual_module.c
 	virtual_module.h
-  utils.c
-  utils.h
   logs.c
   logs.h)
 
