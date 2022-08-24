@@ -73,7 +73,7 @@ void virtualModuleReceiveData(char *dataReceived, uint16_t dataReceivedLen) {
             switch(command) {
                 case CMD_MODE_QUIT: {
                     snprintf(pGlobalBuffer, BUFFER_MAX_LEN, "END\r\n");
-                    _command_mode = true;
+                    _command_mode = false;
                     break;
                 }
                 case CMD_CLEAR_ALL_SERVICES: {
