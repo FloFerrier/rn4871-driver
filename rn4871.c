@@ -114,6 +114,8 @@ uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *response) {
 	uint8_t ret = CODE_RETURN_ERROR;
     enum rn4871_cmd_e cmd = _currentCmd;
 
+    logger(LOG_DEBUG, "rn4871ResponseProcess: [%d] \"%s\"\r\n", strlen(response), response);
+
     if((NULL != strstr(response, "AOK")) || (NULL != strstr(response, "CMD>")) || (NULL != strstr(response, "END"))) {
         _fsmState = FSM_STATE_INIT;
 
