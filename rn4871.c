@@ -33,6 +33,7 @@ static enum rn4871_cmd_e _currentCmd = CMD_NONE;
 static enum rn4871_fsm_e _fsmState = FSM_STATE_NONE;
 
 static uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const char *format, ...);
+static uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *response);
 static void rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, char *result);
 static void rn4871ParseFirmwareVersion(const char *firmwareVersion, char *result);
 
@@ -152,7 +153,6 @@ uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *response) {
                 }
                 case CMD_REBOOT:
                 case CMD_RESET_FACTORY: {
-                    _fsmState = FSM_STATE_IDLE;
                     _currentMode = DATA_MODE;
                     ret = CODE_RETURN_SUCCESS;
                     break;
@@ -163,19 +163,42 @@ uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *response) {
             }
         }
     }
-    else if(NULL != strstr(response, "STREAM_OPEN")) {
-        _fsmState = FSM_STATE_STREAMING;
-		ret = CODE_RETURN_SUCCESS;
+	return ret;
+}
+
+uint8_t rn4871ReceivedDataProcess(struct rn4871_dev_s *dev) {
+    assert(NULL != dev);
+
+    uint8_t ret = CODE_RETURN_ERROR;
+
+    if(DATA_MODE != _currentMode) {
+        return CODE_RETURN_NO_DATA_MODE;
     }
-    else if(NULL != strstr(response, "DISCONNECT")) {
+
+    char receivedData[BUFFER_UART_LEN_MAX+1] = "";
+    uint16_t receivedDataLen = 0;
+    dev->uartRx(receivedData, &receivedDataLen);
+
+    logger(LOG_DEBUG, "rn4871ReceivedDataProcess: [%d] \"%s\"\r\n", receivedDataLen, receivedData);
+
+    if(NULL != strstr(receivedData, "REBOOT")) {
         _fsmState = FSM_STATE_IDLE;
 		ret = CODE_RETURN_SUCCESS;
     }
-    else if(NULL != strstr(response, "CONNECT")) {
+    else if(NULL != strstr(receivedData, "DISCONNECT")) {
+        _fsmState = FSM_STATE_IDLE;
+		ret = CODE_RETURN_SUCCESS;
+    }
+    else if(NULL != strstr(receivedData, "CONNECT")) {
         _fsmState = FSM_STATE_CONNECTED;
 		ret = CODE_RETURN_SUCCESS;
     }
-	return ret;
+    else if(NULL != strstr(receivedData, "STREAM_OPEN")) {
+        _fsmState = FSM_STATE_STREAMING;
+		ret = CODE_RETURN_SUCCESS;
+    }
+
+    return ret;
 }
 
 uint8_t rn4871EnterCommandMode(struct rn4871_dev_s *dev) {

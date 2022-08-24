@@ -131,6 +131,10 @@ void virtualModuleReceiveData(char *dataReceived, uint16_t dataReceivedLen) {
             _command_mode = true;
         }
     }
+    /* Data mode */
+    else {
+        strncpy(pGlobalBuffer, dataReceived, BUFFER_MAX_LEN);
+    }
 }
 
 void virtualModuleSendData(char *dataToSend, uint16_t *dataToSendLen) {
@@ -147,7 +151,6 @@ void virtualModuleConnect(struct rn4871_dev_s *dev) {
     strncpy(saveBuffer, "\%CONNECT,0,AABBCCDDEEFF\%", BUFFER_MAX_LEN);
     uint16_t bufferLen = strlen(saveBuffer);
     dev->uartTx(saveBuffer, &bufferLen);
-    rn4871ResponseProcess(dev, saveBuffer);
 }
 
 void virtualModuleStream(struct rn4871_dev_s *dev) {
@@ -156,7 +159,6 @@ void virtualModuleStream(struct rn4871_dev_s *dev) {
     strncpy(saveBuffer, "\%STREAM_OPEN\%", BUFFER_MAX_LEN);
     uint16_t bufferLen = strlen(saveBuffer);
     dev->uartTx(saveBuffer, &bufferLen);
-    rn4871ResponseProcess(dev, saveBuffer);
 }
 
 void virtualModuleDisconnect(struct rn4871_dev_s *dev) {
@@ -165,7 +167,6 @@ void virtualModuleDisconnect(struct rn4871_dev_s *dev) {
     strncpy(saveBuffer, "\%DISCONNECT\%", BUFFER_MAX_LEN);
     uint16_t bufferLen = strlen(saveBuffer);
     dev->uartTx(saveBuffer, &bufferLen);
-    rn4871ResponseProcess(dev, saveBuffer);
 }
 
 void virtualModuleSetForceDataMode(void) {
