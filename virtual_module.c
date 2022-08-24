@@ -72,7 +72,7 @@ void virtualModuleReceiveData(char *dataReceived, uint16_t dataReceivedLen) {
         if(CMD_NONE != command) {
             switch(command) {
                 case CMD_MODE_QUIT: {
-                    snprintf(pGlobalBuffer, BUFFER_MAX_LEN, "AOK\r\nCMD>");
+                    snprintf(pGlobalBuffer, BUFFER_MAX_LEN, "END\r\n");
                     _command_mode = true;
                     break;
                 }
@@ -82,7 +82,7 @@ void virtualModuleReceiveData(char *dataReceived, uint16_t dataReceivedLen) {
                 }
                 case CMD_RESET_FACTORY:
                 case CMD_REBOOT: {
-                    strncpy(pGlobalBuffer, "Rebooting\r\n%REBOOT%", BUFFER_MAX_LEN);
+                    strncpy(pGlobalBuffer, "Rebooting\r\nCMD>", BUFFER_MAX_LEN);
                     _command_mode = false;
                     break;
                 }
