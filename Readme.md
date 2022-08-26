@@ -130,7 +130,7 @@ uint8_t rn4871IsOnTransparentUart(struct rn4871_dev_s *dev, bool *result);
 ```
 On data mode, you can use these functions :
 ```c
-uint8_t rn4871ReceivedDataProcess(struct rn4871_dev_s *dev);
+uint8_t rn4871WaitReceivedData(struct rn4871_dev_s *dev, char *receivedData, uint16_t *receivedDataLen);
 uint8_t rn4871TransparentUartSendData(struct rn4871_dev_s *dev, const char *dataToSend, uint16_t dataToSendLen);
 ```
 To help us, a software **FSM** (Finite-State Machine)
@@ -193,19 +193,20 @@ n4871QuitCommandMode(&dev);
 /* Wait an external bluetooth module try to connect
  * and start streaming.
  */
+char receivedData[BUFFER_UART_LEN_MAX+1] "";
+uint16_t receivedDataLen = 0;
 while(FSM_STATE_STREAMING != rn4871GetFsmState()) {
-	rn4871ReceivedDataProcess(&dev);
+	rn4871WaitReceivedData(&dev, receivedData, &receivedDataLen);
 }
 /* Send amount of data on Transparent UART mode */
 rn4871TransparentUartSendData(&dev, "Data send by server module", strlen("Data send by server module")));
 /* Wait a response from client module */
-rn4871ReceivedDataProcess(&dev);
+rn4871WaitReceivedData(&dev, receivedData, &receivedDataLen);
 ```
 ## Release Note
 - **v0.1.0**
 	- Support only gatt **server mode**
 	- Support **Transparent UART**
-
 ## Roadmap
 - **v0.2.0**
 	- Add Gatt support with **custom services and characteristics**
