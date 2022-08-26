@@ -138,9 +138,68 @@ is implemented for having the state of the module.
 ```c
 enum rn4871_fsm_e rn4871GetFsmState(void);
 ```
-### Exemple
-This exemple allows to describe sequence for using Transparent UART mode. 
+### Internal Driver Log
+The driver implements an internal logger, you can enable log with the variable **RN4871_LOG_ENABLE**.
 ```c
+#define RN4871_LOG_ENABLE (LOG_ERROR | LOG_DEBUG | LOG_INFO)
+```
+You find the bitmap on the file **rn4871_logger.h**. 
+```c
+enum log_level_e {
+    LOG_ERROR = 0x1,
+    LOG_DEBUG = 0x2,
+    LOG_INFO  = 0x4,
+};
+```
+### Virtual Module
+If you do not have the hardware module, the driver contains a virtual module for emulating it.
+```c
+void rn4871SetForceFsmState(enum rn4871_fsm_e fsmForceState);
+void rn4871SetForceDataMode(void);
+void virtualModuleReceiveData(char *dataReceived, uint16_t dataReceivedLen);
+void virtualModuleSendData(char *dataToSend, uint16_t *dataToSendLen);
+void virtualModuleConnect(struct rn4871_dev_s *dev);
+void virtualModuleStream(struct rn4871_dev_s *dev);
+void virtualModuleDisconnect(struct rn4871_dev_s *dev);
+void virtualModuleSetForceDataMode(void);
+```
+### Exemple
+This exemple allows to describe sequence for using Transparent UART mode.
+> **Notes:** All specific hardware configuration for your microcontroller are not describe it.
+```c
+/* Instantiate structure */
+struct rn4871_dev_s dev = {
+	.uartTx = rn4871UartTxCb,
+	.uartRx = rn4871UartRxCb,
+	.delayMs = rn4871DelayMsCb,
+};
+
+/* Set the module */
+rn4871EnterCommandMode(&dev);
+rn4871SetDeviceName(&dev, "test", strlen("test"));
+rn4871SetServices(&dev, DEVICE_INFORMATION | UART_TRANSPARENT);
+/* Reboot for saving settings */
+rn4871RebootModule(&dev);
+/* Verification of Transparent UART mode */
+rn4871EnterCommandMode(&dev);
+bool modeIsTransparentUart = false;
+rn4871IsOnTransparentUart(&dev, &modeIsTransparentUart);
+if(!modeIsTransparentUart) {
+	/* No Transparent UART ... */
+	return;
+}
+/* For using Transparent UART, the module must to on data mode */
+n4871QuitCommandMode(&dev);
+/* Wait an external bluetooth module try to connect
+ * and start streaming.
+ */
+while(FSM_STATE_STREAMING != rn4871GetFsmState()) {
+	rn4871ReceivedDataProcess(&dev);
+}
+/* Send amount of data on Transparent UART mode */
+rn4871TransparentUartSendData(&dev, "Data send by server module", strlen("Data send by server module")));
+/* Wait a response from client module */
+rn4871ReceivedDataProcess(&dev);
 ```
 ## Release Note
 - **v0.1.0**
