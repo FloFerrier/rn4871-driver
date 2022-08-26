@@ -19,7 +19,7 @@ struct rn4871_dev_s {
     rn4871_delay_fptr_t delayMs;
 };
 
-uint8_t rn4871ReceivedDataProcess(struct rn4871_dev_s *dev);
+uint8_t rn4871WaitReceivedData(struct rn4871_dev_s *dev, char *receivedData, uint16_t *receivedDataLen);
 uint8_t rn4871EnterCommandMode(struct rn4871_dev_s *dev);
 uint8_t rn4871QuitCommandMode(struct rn4871_dev_s *dev);
 uint8_t rn4871RebootModule(struct rn4871_dev_s *dev);

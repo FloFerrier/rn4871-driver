@@ -166,39 +166,31 @@ uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *response) {
 	return ret;
 }
 
-uint8_t rn4871ReceivedDataProcess(struct rn4871_dev_s *dev) {
+uint8_t rn4871WaitReceivedData(struct rn4871_dev_s *dev, char *receivedData, uint16_t *receivedDataLen) {
     assert(NULL != dev);
-
-    uint8_t ret = CODE_RETURN_ERROR;
 
     if(DATA_MODE != _currentMode) {
         return CODE_RETURN_NO_DATA_MODE;
     }
 
-    char receivedData[BUFFER_UART_LEN_MAX+1] = "";
-    uint16_t receivedDataLen = 0;
-    dev->uartRx(receivedData, &receivedDataLen);
+    dev->uartRx(receivedData, receivedDataLen);
 
-    logger(LOG_DEBUG, "rn4871ReceivedDataProcess: [%d] \"%s\"\r\n", receivedDataLen, receivedData);
+    logger(LOG_DEBUG, "rn4871ReceivedDataProcess: [%d] \"%s\"\r\n", *receivedDataLen, receivedData);
 
     if(NULL != strstr(receivedData, "REBOOT")) {
         _fsmState = FSM_STATE_IDLE;
-		ret = CODE_RETURN_SUCCESS;
     }
     else if(NULL != strstr(receivedData, "DISCONNECT")) {
         _fsmState = FSM_STATE_IDLE;
-		ret = CODE_RETURN_SUCCESS;
     }
     else if(NULL != strstr(receivedData, "CONNECT")) {
         _fsmState = FSM_STATE_CONNECTED;
-		ret = CODE_RETURN_SUCCESS;
     }
     else if(NULL != strstr(receivedData, "STREAM_OPEN")) {
         _fsmState = FSM_STATE_STREAMING;
-		ret = CODE_RETURN_SUCCESS;
     }
 
-    return ret;
+    return CODE_RETURN_SUCCESS;
 }
 
 uint8_t rn4871EnterCommandMode(struct rn4871_dev_s *dev) {
