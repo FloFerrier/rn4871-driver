@@ -1,200 +1,157 @@
-# librn4871-driver
-Portable library for abstracting RN4871 module functions.
-## Integration exemple
-In this exemple, the module RN4871 must connect to the desktop with a converter UART/tty, so we use the port serial on a Linux desktop.
-### Prerequisities
+# RN4871 module API
+## Introduction
+This package contains a **portable library** for abstracting RN4871 module API.
+RN4871 is a hardware module that supports **BLE** (Bluetooth Low Energy) and distributed by **Microship** [link to Website](https://www.microchip.com/en-us/product/RN4871).
+The module is designed to allow an easily interfacing with a device like a microcontroller via a **standard UART**. So, developers can used a module with a completely integrated Bluetooth software stack and add a wireless connectivity to their products.
+The module supports **GATT** (Generic ATTribute Profile), this acronym defines the way that two BLE devices transfer data. The data protocol uses concepts named **Services** and **Characteristics**. On this structure, the module contains a specific service for simulating an UART communication named **Transparent UART**.
+## User guide
+### Default UART settings
+The driver do not allow to change UART settings on the module.
+So, we consider to use the default settings :
+- Baudrate: 115200
+- Databits: 8
+- Parity: None
+- Stopbits: 1
+- Flowcontrol: Disabled
 
-### Code exemple
+> **Notes:** If you want change this, you must to adapt your embedded UART setting but also send good commands to the module (independatly to the driver).
+
+### Software FSM (Finite-State Machine)
+Todo
+### Interfacing with callback
+The driver uses callback for abstracting embedded hardware. So, developers
+must define callback functions for using UART communication and delay.
+These callbacks are specific to your hardware !
+You can reuse this template for declarating callbacks :
+> **Notes:** The function **rn4871LogSender** is not a callback but a simple extern function declaration.
 ```c
-#include "rn4871.h"
-#include "virtual_module.h"
+void rn4871LogSender(char *log, int len) {
+	/* Check if argument is NULL or not */
+	assert(NULL != log);
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <termios.h>
-#include <unistd.h>
-#include <assert.h>
-
-#define VIRTUAL_MODULE true
-
-#define BUFFER_UART_MAX_LEN (255)
-
-int serialPort;
-
-uint8_t rn4871UartTxAPI(uint8_t *pBuffer, uint16_t *bufferSize);
-uint8_t rn4871UartRxAPI(uint8_t *pBuffer, uint16_t *bufferSize);
-void rn4871DelayMsAPI(uint32_t delay);
-
-uint8_t rn4871UartTxAPI(uint8_t *pBuffer, uint16_t *bufferSize) {
-	assert(NULL != pBuffer) || (NULL != bufferSize));
-
-	if(VIRTUAL_MODULE) {
-		uartRxVirtualModule(pBuffer, *bufferSize);
-	}
-	else {
-		ssize_t sizeWrite = write(serialPort, pBuffer, *bufferSize);
-		if(0 >= sizeWrite) {
-			printf("Fail to send data : [%d] %s\r\n", *bufferSize, pBuffer);
-            return CODE_RETURN_UART_FAIL;
-		}
-	}
-	printf("[TX:%d] %s\r\n", *bufferSize, pBuffer);
-    return CODE_RETURN_SUCCESS;
+	/* Typically, logs are sending to serial port (like printf functions).
+	 * But, be careful to define this function because microcontroller
+	 * can not support this natively.
+	 */
 }
 
-uint8_t rn4871UartRxAPI(uint8_t *pBuffer, uint16_t *bufferSize) {
-	assert(NULL != pBuffer) || (NULL != bufferSize));
+uint8_t rn4871UartTxCb(char *buf, uint16_t *len) {
+	/* Check if arguments are NULL or not */
+	assert((NULL != buf) || (NULL != len);
 
-	memset(pBuffer, '\0', BUFFER_UART_MAX_LEN);
-	if(VIRTUAL_MODULE) {
-		uartTxVirtualModule(pBuffer, bufferSize);
-	}
-	else {
-		*bufferSize = read(serialPort, pBuffer, BUFFER_UART_MAX_LEN);
-	}
+	/* Add function to allow send amount of data
+	 * through UART port.
+	 * The pointer buf must contain all the data and len must 
+	 * contain the amount of data.
+	 * Hardware module sends only ASCII character (on 8 bits).
+	 */
 
-	if (0 >= *bufferSize) {
-      	printf("Fail to receive data: %s\r\n", strerror(errno));
-        return CODE_RETURN_UART_FAIL;
-  	}
-	printf("[RX:%d] %s\r\n", *bufferSize, pBuffer);
-    return CODE_RETURN_SUCCESS;
+	/* Return code
+	 * CODE_RETURN_SUCCESS
+	 * CODE_RETURN_UART_FAIL
+	 * See rn4871_defs.h for other code return
+	 */
+    return CODE_RETURN_UART_FAIL;
 }
 
-void rn4871DelayMsAPI(uint32_t delay) {
-	usleep(delay*1000);
+uint8_t rn4871UartRxCb(char *buf, uint16_t *len) {
+	/* Check if arguments are NULL or not */
+	assert((NULL != buf) || (NULL != len);
+
+	/* Add function to allow receive amount of data
+	 * through UART port.
+	 * The pointer buf must return all the data and len must return
+	 * the amount of data.
+	 * Hardware module sends only ASCII character (on 8 bits).
+	 */
+
+	/* Return code
+	 * CODE_RETURN_SUCCESS
+	 * CODE_RETURN_UART_FAIL
+	 * See rn4871_defs.h for other code return
+	 */
+    return CODE_RETURN_UART_FAIL;
 }
 
-int main (void) {
-
-	if(VIRTUAL_MODULE) {
-		printf("Virtual module selected !\r\n");
-	}
-	else {
-		printf("Real module selected !\r\n");
-		printf("Serial port configuration\r\n");
-		serialPort = open("/dev/ttyUSB0", O_RDWR);
-		if(0 >= serialPort) {
-			printf("Fail to open serial port ...\r\n");
-			return -1;
-		}
-		printf("Serial port open !\r\n");
-		struct termios tty;
-		if(0 != tcgetattr(serialPort, &tty)) {
-			printf("Error %i from tcgetattr: %s\n", errno, strerror(errno));
-			return -1;
-		}
-
-		printf("Get serial configuration with success !\r\n");
-
-		tty.c_cflag &= ~PARENB; // Clear parity bit, disabling parity (most common)
-		tty.c_cflag &= ~CSTOPB; // Clear stop field, only one stop bit used in communication (most common)
-		tty.c_cflag &= ~CSIZE; // Clear all bits that set the data size 
-		tty.c_cflag |= CS8; // 8 bits per byte (most common)
-		tty.c_cflag &= ~CRTSCTS; // Disable RTS/CTS hardware flow control (most common)
-		tty.c_cflag |= CREAD | CLOCAL; // Turn on READ & ignore ctrl lines (CLOCAL = 1)
-
-		tty.c_lflag &= ~ICANON;
-		tty.c_lflag &= ~ECHO; // Disable echo
-		tty.c_lflag &= ~ECHOE; // Disable erasure
-		tty.c_lflag &= ~ECHONL; // Disable new-line echo
-		tty.c_lflag &= ~ISIG; // Disable interpretation of INTR, QUIT and SUSP
-		tty.c_iflag &= ~(IXON | IXOFF | IXANY); // Turn off s/w flow ctrl
-		tty.c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL); // Disable any special handling of received bytes
-
-		tty.c_oflag &= ~OPOST; // Prevent special interpretation of output bytes (e.g. newline chars)
-		tty.c_oflag &= ~ONLCR; // Prevent conversion of newline to carriage return/line feed
-		// tty.c_oflag &= ~OXTABS; // Prevent conversion of tabs to spaces (NOT PRESENT ON LINUX)
-		// tty.c_oflag &= ~ONOEOT; // Prevent removal of C-d chars (0x004) in output (NOT PRESENT ON LINUX)
-
-		tty.c_cc[VTIME] = 10; // Wait for up to 1s (10 deciseconds), returning as soon as any data is received.
-		tty.c_cc[VMIN] = 0;
-
-		// Set baudrate at 115200 bauds
-		cfsetispeed(&tty, B115200);
-		cfsetospeed(&tty, B115200);
-
-		if(0 != tcsetattr(serialPort, TCSANOW, &tty)) {
-			printf("Error %i from tcsetattr: %s\r\n", errno, strerror(errno));
-			return -1;
-		}
-
-		printf("Set serial configuration with success !\r\n");
-	}
-
-	/* RN4871 Usecase */
-	struct rn4871_dev_s dev = {
-		.uartTx = rn4871UartTxAPI,
-		.uartRx = rn4871UartRxAPI,
-		.delayMs = rn4871DelayMsAPI,
-		._current_cmd = CMD_NONE,
-		.fsm_state = FSM_STATE_INIT,
-	};
-
-	uint8_t ret = rn4871EnterCommandMode(&dev);
-	if(CODE_RETURN_SUCCESS != ret) {
-		printf("Fail to enter on command mode ...\r\n");
-		return 0;
-	}
-	printf("RN4871 is on command mode\r\n");
-
-	const char deviceName[21] = "test_main";
-	ret = rn4871SetDeviceName(&dev, deviceName, strlen(deviceName));
-	if(CODE_RETURN_SUCCESS != ret) {
-		printf("Fail to set device name ...%d\r\n", ret);
-	}
-
-	char realDeviceName[21] = "";
-	ret = rn4871GetDeviceName(&dev, realDeviceName);
-	if(CODE_RETURN_SUCCESS != ret) {
-		printf("Fail to get device name ...%d\r\n", ret);
-	}
-
-	if(0 == strcmp(deviceName, realDeviceName)) {
-		printf("RN4871 module is now name : %s\r\n", realDeviceName);
-	}
-	else {
-		printf("New device name is not setting correctly ...\r\n");
-	}
-
-	char firmwareVersion[256] = "";
-	ret = rn4871GetFirmwareVersion(&dev, firmwareVersion);
-	if(CODE_RETURN_SUCCESS != ret) {
-		printf("Fail to get firmware version ...%d\r\n", ret);
-	}
-	else {
-		printf("RN4871 module firmware version : %s\r\n", firmwareVersion);
-	}
-
-	ret = rn4871SetServices(&dev, DEVICE_INFORMATION | UART_TRANSPARENT);
-	if(CODE_RETURN_SUCCESS != ret) {
-		printf("Fail to set services ...%d\r\n", ret);
-	}
-	else {
-		printf("RN4871 module services as Transparent UART\r\n");
-	}
-
-	ret = rn4871RebootModule(&dev);
-	if(CODE_RETURN_SUCCESS != ret) {
-		printf("Fail to reboot module ...%d\r\n", ret);
-	}
-
-	dev.fsm_state = FSM_STATE_STREAMING;
-	char *dataToSend = malloc(sizeof(char)*(255+1));
-	int sizeToSend = snprintf(dataToSend, 255, "Test data to send");
-	if(CODE_RETURN_SUCCESS != rn4871TransparentUartSendData(&dev, dataToSend, sizeToSend)) {
-		printf("Error to transmit data through transparent uart ...\r\n");
-	}
-	else {
-		printf("Success to transmit data through transparent uart !\r\n");
-	}
-
-	free(dataToSend);
-	close(serialPort);
-	printf("Serial port close with success !\r\n");
-	return 0;
+void rn4871DelayMsCb(uint32_t delay) {
+	/* Wait a delay in milliseconds */
 }
 ```
+### Structure instantiation
+The driver supports only one instantiation of RN4871 structure because
+we consider that one microcontroller will control only one RN4871 module.
+```c
+struct rn4871_dev_s dev = {
+	.uartTx = rn4871UartTxCb,
+	.uartRx = rn4871UartRxCb,
+	.delayMs = rn4871DelayMsCb,
+};
+```
+### Code return for function APIs
+A set of code return is describing on the file **rn4871_defs.h**.
+An enumerator variable allows to simplify the comprehension.
+```c
+enum rn4871_code_return_e {
+  CODE_RETURN_SUCCESS,
+  CODE_RETURN_ERROR,
+  CODE_RETURN_UART_FAIL,
+  CODE_RETURN_CMD_UNKNOWN,
+  CODE_RETURN_NO_COMMAND_MODE,
+  CODE_RETURN_NO_DATA_MODE,
+  CODE_RETURN_NO_TRANSPARENT_UART,
+  CODE_RETURN_NO_CONNECTED,
+  CODE_RETURN_NO_STREAMING,
+};
+```
+### Functions APIs
+#### Functions for configuring the module
+The module can be set by different functions. For using
+these functions, the module must to be on command mode.
+To enter on command mode, we have this function:
+```c
+uint8_t rn4871EnterCommandMode(struct rn4871_dev_s *dev);
+```
+To quit the command mode, we have two possibilities:
+> **Notes:** For activating some settings, the module must to be reboot.
+```c
+uint8_t rn4871QuitCommandMode(struct rn4871_dev_s *dev);
+uint8_t rn4871RebootModule(struct rn4871_dev_s *dev);
+```
+After entering on command mode, you can use theses functions :
+```c
+uint8_t rn4871SetServices(struct rn4871_dev_s *dev, uint16_t service);
+uint8_t rn4871SetDeviceName(struct rn4871_dev_s *dev, const char *deviceName, uint16_t deviceNameLen);
+uint8_t rn4871GetServices(struct rn4871_dev_s *dev, uint16_t *services);
+uint8_t rn4871GetDeviceName(struct rn4871_dev_s *dev, char *deviceName);
+uint8_t rn4871GetFirmwareVersion(struct rn4871_dev_s *dev, char *firmwareVersion);
+uint8_t rn4871DumpInfos(struct rn4871_dev_s *dev, char *infos);
+uint8_t rn4871GetMacAddress(struct rn4871_dev_s *dev, char *macAddress);
+uint8_t rn4871IsOnTransparentUart(struct rn4871_dev_s *dev, bool *result);
+```
+On data mode, you can use these functions :
+```c
+uint8_t rn4871ReceivedDataProcess(struct rn4871_dev_s *dev);
+uint8_t rn4871TransparentUartSendData(struct rn4871_dev_s *dev, const char *dataToSend, uint16_t dataToSendLen);
+```
+To help us, a software **FSM** (Finite-State Machine)
+is implemented for having the state of the module. 
+```c
+enum rn4871_fsm_e rn4871GetFsmState(void);
+```
+### Exemple
+This exemple allows to describe sequence for using Transparent UART mode. 
+```c
+```
+## Release Note
+- **v0.1.0**
+	- Support only gatt **server mode**
+	- Support **Transparent UART**
+
+## Roadmap
+- **v0.2.0**
+	- Add Gatt support with **custom services and characteristics**
+
+> **Note:** vX.Y.Z release notation :
+> X : Major version without API compatibily
+> Y : Minor version with continuous compatibility
+> Z : Patch for bug fixes
