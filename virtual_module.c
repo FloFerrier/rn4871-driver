@@ -1,5 +1,5 @@
 #include "virtual_module.h"
-#include "logs.h"
+#include "rn4871_logger.h"
 
 #define BUFFER_MAX_LEN (255)
 #define MODULE_NAME_LEN (21)

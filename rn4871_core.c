@@ -1,6 +1,6 @@
-#include "rn4871.h"
 #include "rn4871_defs.h"
-#include "logs.h"
+#include "rn4871_api.h"
+#include "rn4871_logger.h"
 
 #define RN4871_DELAY_TO_RESPECT_MS 100
 #define BASE_HEXADECIMAL 16

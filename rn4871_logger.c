@@ -1,4 +1,4 @@
-#include "logs.h"
+#include "rn4871_logger.h"
 
 #include <assert.h>
 #include <stdarg.h>

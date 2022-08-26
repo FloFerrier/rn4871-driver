@@ -1,5 +1,5 @@
-#ifndef VIRTUAL_MODULE__H
-#define VIRTUAL_MODULE__H
+#ifndef VIRTUAL_MODULE_H
+#define VIRTUAL_MODULE_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include "rn4871.h"
+#include "rn4871_api.h"
 
 void virtualModuleReceiveData(char *dataReceived, uint16_t dataReceivedLen);
 void virtualModuleSendData(char *dataToSend, uint16_t *dataToSendLen);
@@ -17,4 +17,4 @@ void virtualModuleStream(struct rn4871_dev_s *dev);
 void virtualModuleDisconnect(struct rn4871_dev_s *dev);
 void virtualModuleSetForceDataMode(void);
 
-#endif /* VIRTUAL_MODULE__H */
+#endif /* VIRTUAL_MODULE_H */

@@ -1,5 +1,5 @@
-#ifndef RN4871_H
-#define RN4871_H
+#ifndef RN4871_API_H
+#define RN4871_API_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -37,4 +37,4 @@ enum rn4871_fsm_e rn4871GetFsmState(void);
 void rn4871SetForceFsmState(enum rn4871_fsm_e fsmForceState);
 void rn4871SetForceDataMode(void);
 
-#endif /* RN4871_H */
+#endif /* RN4871_API_H */

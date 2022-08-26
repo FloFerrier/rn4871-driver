@@ -1,6 +1,8 @@
 #ifndef RN4871_DEFS_H
 #define RN4871_DEFS_H
 
+#include <stdint.h>
+
 #define BUFFER_UART_LEN_MAX (255)
 
 #define DEVICE_NAME_CHARACTER_MAX (20)
