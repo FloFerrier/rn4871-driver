@@ -7,11 +7,13 @@
 
 char logBuffer[LOG_BUFFER_LEN_MAX+1] = "";
 
-void logger(enum log_level_e level, const char *message, ...) {
+void logger(enum log_level_e level, const char *message, ...)
+{
     assert(NULL != message);
 
     #ifdef RN4871_LOG_ENABLE
-        if(!(RN4871_LOG_ENABLE & level)) {
+        if(!(RN4871_LOG_ENABLE & level))
+        {
             return;
         }
 
@@ -20,7 +22,8 @@ void logger(enum log_level_e level, const char *message, ...) {
 
         int logBufferLen = 0;
 
-        switch(level) {
+        switch(level)
+        {
             case LOG_ERROR:
                 logBufferLen = snprintf(logBuffer, LOG_BUFFER_LEN_MAX, "[ERROR] ");
                 break;

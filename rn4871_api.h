@@ -13,7 +13,8 @@
 
 #include "rn4871_defs.h"
 
-struct rn4871_dev_s {
+struct rn4871_dev_s
+{
     rn4871_com_fptr_t   uartTx;
     rn4871_com_fptr_t   uartRx;
     rn4871_delay_fptr_t delayMs;
