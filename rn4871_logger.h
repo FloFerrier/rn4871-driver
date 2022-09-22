@@ -12,6 +12,6 @@ enum log_level_e
 
 void logger(enum log_level_e level, const char *message, ...);
 
-extern void rn4871LogSenderAPI(char *log, int logLen);
+extern void rn4871LogSender(char *log, int logLen);
 
 #endif /* RN4871_LOGGER_H */

@@ -40,7 +40,7 @@ void logger(enum log_level_e level, const char *message, ...)
         vsnprintf(&logBuffer[logBufferLen], LOG_BUFFER_LEN_MAX - logBufferLen, message, args);
 
         logBufferLen = (int)strlen(logBuffer);
-        rn4871LogSenderAPI(logBuffer, logBufferLen);
+        rn4871LogSender(logBuffer, logBufferLen);
 
         va_end(args);
     #else
