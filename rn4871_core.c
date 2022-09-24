@@ -239,11 +239,6 @@ uint8_t rn4871EnterCommandMode(struct rn4871_dev_s *dev)
         return ret;
     }
     ret = rn4871ResponseProcess(dev, response);
-    if(CODE_RETURN_SUCCESS != ret)
-    {
-        return ret;
-    }
-
     return ret;
 }
 
@@ -266,11 +261,6 @@ uint8_t rn4871QuitCommandMode(struct rn4871_dev_s *dev)
         return ret;
     }
     ret = rn4871ResponseProcess(dev, response);
-    if(CODE_RETURN_SUCCESS != ret)
-    {
-        return ret;
-    }
-
     return ret;
 }
 
@@ -321,11 +311,6 @@ uint8_t rn4871SetServices(struct rn4871_dev_s *dev, uint16_t service)
         return ret;
     }
     ret = rn4871ResponseProcess(dev, response);
-    if(CODE_RETURN_SUCCESS != ret)
-    {
-        return ret;
-    }
-
     return ret;
 }
 
@@ -557,11 +542,6 @@ uint8_t rn4871EraseAllGattServices(struct rn4871_dev_s *dev)
         return ret;
     }
     ret = rn4871ResponseProcess(dev, response);
-    if(CODE_RETURN_SUCCESS != ret)
-    {
-        return ret;
-    }
-
     return ret;
 }
 
