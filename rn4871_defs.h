@@ -40,6 +40,12 @@ enum rn4871_cmd_e
   	CMD_NONE,
 };
 
+enum rn4871_mode_e
+{
+    DATA_MODE,
+    COMMAND_MODE,
+};
+
 enum rn4871_fsm_e
 {
 	FSM_STATE_NONE,
