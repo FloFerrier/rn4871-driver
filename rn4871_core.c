@@ -287,8 +287,6 @@ uint8_t rn4871RebootModule(struct rn4871_dev_s *dev)
     {
         return ret;
     }
-
-    _fsmState = FSM_STATE_IDLE;
     return ret;
 }
 
