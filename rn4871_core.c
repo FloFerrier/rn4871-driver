@@ -37,8 +37,8 @@ static enum rn4871_fsm_e _fsmState = FSM_STATE_NONE;
 
 static uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const char *format, ...);
 static uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *response);
-static void rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, char *result);
-static void rn4871ParseFirmwareVersion(const char *firmwareVersion, char *result);
+static uint8_t rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, char *result);
+static uint8_t rn4871ParseFirmwareVersion(const char *firmwareVersion, char *result);
 
 uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const char *format, ...)
 {
@@ -377,15 +377,15 @@ uint8_t rn4871GetDeviceName(struct rn4871_dev_s *dev, char *deviceName)
         logger(LOG_ERROR, "rn4871GetDeviceName: string device name is empty ...\r\n");
         return CODE_RETURN_ERROR;
     }
-
-    rn4871ParseDumpInfos(infos, FIELD_DEVICE_NAME, deviceName);
+    ret = rn4871ParseDumpInfos(infos, FIELD_DEVICE_NAME, deviceName);
     return ret;
 }
 
-void rn4871ParseFirmwareVersion(const char *firmwareVersion, char *result)
+uint8_t rn4871ParseFirmwareVersion(const char *firmwareVersion, char *result)
 {
     assert((NULL != firmwareVersion) || (NULL != result));
 
+    uint8_t ret = CODE_RETURN_ERROR;
     char *saveptr;
     char delimiter[] = " \r\n";
     char *token = strtok_r((char*)firmwareVersion, delimiter, &saveptr);
@@ -393,12 +393,17 @@ void rn4871ParseFirmwareVersion(const char *firmwareVersion, char *result)
     {
         if(NULL != strstr(token, "V"))
         {
+            ret = CODE_RETURN_SUCCESS;
             break;
         }
         token = strtok_r(NULL, delimiter, &saveptr);
     } while(NULL != token);
 
-    strncpy(result, token, BUFFER_UART_LEN_MAX);
+    if(CODE_RETURN_SUCCESS == ret)
+    {
+        strncpy(result, token, BUFFER_UART_LEN_MAX);
+    }
+    return ret;
 }
 
 uint8_t rn4871GetFirmwareVersion(struct rn4871_dev_s *dev, char *firmwareVersion)
@@ -424,8 +429,7 @@ uint8_t rn4871GetFirmwareVersion(struct rn4871_dev_s *dev, char *firmwareVersion
     {
         return ret;
     }
-
-    rn4871ParseFirmwareVersion(response, firmwareVersion);
+    ret = rn4871ParseFirmwareVersion(response, firmwareVersion);
     return ret;
 }
 
@@ -462,7 +466,7 @@ uint8_t rn4871DumpInfos(struct rn4871_dev_s *dev, char *infos)
     return ret;
 }
 
-void rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, char *result)
+uint8_t rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, char *result)
 {
     assert((NULL != infos) || (NULL != result));
 
@@ -481,13 +485,13 @@ void rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, char
     if(NULL == token)
     {
         logger(LOG_ERROR, "rn4871ParseDumpInfos: string infos is empty ...\r\n");
-        return;
+        return CODE_RETURN_ERROR;
     }
-
     char *tmp;
     tmp = strtok_r(token, "=", &saveptr);
     tmp = strtok_r(NULL, "=", &saveptr);
     strncpy(result, tmp, BUFFER_UART_LEN_MAX);
+    return CODE_RETURN_SUCCESS;
 }
 
 uint8_t rn4871GetMacAddress(struct rn4871_dev_s *dev, char *macAddress)
@@ -529,7 +533,7 @@ uint8_t rn4871GetServices(struct rn4871_dev_s *dev, uint16_t *services)
     }
 
     char tmp[BUFFER_UART_LEN_MAX+1] = "";
-    rn4871ParseDumpInfos(infos, FIELD_SERVICES, tmp);
+    ret = rn4871ParseDumpInfos(infos, FIELD_SERVICES, tmp);
     *services = (uint16_t)strtol(tmp, NULL, BASE_HEXADECIMAL);
     return ret;
 }
