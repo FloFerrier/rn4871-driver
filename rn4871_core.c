@@ -318,13 +318,20 @@ uint8_t rn4871SetServices(struct rn4871_dev_s *dev, uint16_t service)
     return ret;
 }
 
-uint8_t rn4871SetDeviceName(struct rn4871_dev_s *dev, const char *deviceName, uint16_t deviceNameLen)
+uint8_t rn4871SetDeviceName(struct rn4871_dev_s *dev, const char *deviceName)
 {
-    assert((NULL != dev) || (NULL != deviceName) || (DEVICE_NAME_CHARACTER_MAX >= deviceNameLen));
+    assert((NULL != dev) || (NULL != deviceName));
 
     uint8_t ret = CODE_RETURN_ERROR;
     char response[BUFFER_UART_LEN_MAX+1] = "";
     uint16_t responseSize = 0;
+
+    uint16_t deviceNameLen = (uint16_t) strlen(deviceName);
+    if((0 >= deviceNameLen) || (DEVICE_NAME_CHARACTER_MAX < deviceNameLen))
+    {
+        logger(LOG_ERROR, "rn4871SetDeviceName: deviceNameLen is incorrect ... [%d]\r\n", deviceNameLen);
+        return CODE_RETURN_ERROR;
+    }
 
     ret = rn4871SendCmd(dev, CMD_SET_DEVICE_NAME, deviceName);
     if(CODE_RETURN_SUCCESS != ret)
