@@ -344,16 +344,6 @@ uint8_t rn4871SetDeviceName(struct rn4871_dev_s *dev, const char *deviceName)
         return ret;
     }
     ret = rn4871ResponseProcess(dev, response);
-    if(CODE_RETURN_SUCCESS != ret)
-    {
-        return ret;
-    }
-    if(0 >= strlen(deviceName))
-    {
-        logger(LOG_ERROR, "rn4871SetDeviceName: string device name is empty ...\r\n");
-        return CODE_RETURN_ERROR;
-    }
-
     return ret;
 }
 
@@ -367,11 +357,6 @@ uint8_t rn4871GetDeviceName(struct rn4871_dev_s *dev, char *deviceName)
     if(CODE_RETURN_SUCCESS != ret)
     {
         return ret;
-    }
-    if(0 >= infosSize)
-    {
-        logger(LOG_ERROR, "rn4871GetDeviceName: string device name is empty ...\r\n");
-        return CODE_RETURN_ERROR;
     }
     ret = rn4871ParseDumpInfos(infos, FIELD_DEVICE_NAME, deviceName);
     return ret;
@@ -447,11 +432,6 @@ uint8_t rn4871DumpInfos(struct rn4871_dev_s *dev, char *infos)
     {
         return ret;
     }
-    if(0 >= responseSize)
-    {
-        logger(LOG_ERROR, "rn4871DumpInfos: string infos is empty ...\r\n");
-        return CODE_RETURN_ERROR;
-    }
     ret = rn4871ResponseProcess(dev, response);
     if(CODE_RETURN_SUCCESS != ret)
     {
@@ -486,6 +466,10 @@ uint8_t rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, c
     char *tmp;
     tmp = strtok_r(token, "=", &saveptr);
     tmp = strtok_r(NULL, "=", &saveptr);
+    if(NULL == tmp)
+    {
+        return CODE_RETURN_ERROR;
+    }
     strncpy(result, tmp, BUFFER_UART_LEN_MAX);
     return CODE_RETURN_SUCCESS;
 }
@@ -501,13 +485,7 @@ uint8_t rn4871GetMacAddress(struct rn4871_dev_s *dev, char *macAddress)
     {
         return ret;
     }
-    if(0 >= infosSize)
-    {
-        logger(LOG_ERROR, "rn4871GetMacAddress: string infos is empty ...\r\n");
-        return CODE_RETURN_ERROR;
-    }
-
-    rn4871ParseDumpInfos(infos, FIELD_MAC_ADDRESS, macAddress);
+    ret = rn4871ParseDumpInfos(infos, FIELD_MAC_ADDRESS, macAddress);
     return ret;
 }
 
@@ -522,12 +500,6 @@ uint8_t rn4871GetServices(struct rn4871_dev_s *dev, uint16_t *services)
     {
         return ret;
     }
-    if(0 >= infosSize)
-    {
-        logger(LOG_ERROR, "rn4871GetServices: string infos is empty ...\r\n");
-        return CODE_RETURN_ERROR;
-    }
-
     char tmp[BUFFER_UART_LEN_MAX+1] = "";
     ret = rn4871ParseDumpInfos(infos, FIELD_SERVICES, tmp);
     *services = (uint16_t)strtol(tmp, NULL, BASE_HEXADECIMAL);
