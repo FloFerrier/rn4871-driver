@@ -43,6 +43,8 @@ uint8_t rn4871Init(struct rn4871_dev_s *dev)
     dev->_currentMode = DATA_MODE;
     dev->_fsmState = FSM_STATE_NONE;
 
+    logger(LOG_INFO, "rn4871 Init pass with success !\r\n");
+
     return CODE_RETURN_SUCCESS;
 }
 
