@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define BUFFER_UART_LEN_MAX (255)
+#define RN4871_BUFFER_UART_LEN_MAX (255)
 
 #define DEVICE_NAME_CHARACTER_MAX (20)
 
