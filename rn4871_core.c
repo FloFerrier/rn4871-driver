@@ -364,9 +364,8 @@ uint8_t rn4871ParseFirmwareVersion(const char *firmwareVersion, char *result, ui
     assert((NULL != firmwareVersion) || (NULL != result));
 
     uint8_t ret = CODE_RETURN_ERROR;
-    char *saveptr;
     char delimiter[] = " \r\n";
-    char *token = strtok_r((char*)firmwareVersion, delimiter, &saveptr);
+    char *token = strtok((char*)firmwareVersion, delimiter);
     do
     {
         if(NULL != strstr(token, "V"))
@@ -374,7 +373,7 @@ uint8_t rn4871ParseFirmwareVersion(const char *firmwareVersion, char *result, ui
             ret = CODE_RETURN_SUCCESS;
             break;
         }
-        token = strtok_r(NULL, delimiter, &saveptr);
+        token = strtok(NULL, delimiter);
     } while(NULL != token);
 
     if(CODE_RETURN_SUCCESS == ret)
@@ -443,16 +442,15 @@ uint8_t rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, c
 {
     assert((NULL != infos) || (NULL != result));
 
-    char *saveptr;
     char delimiter[] = "\r\n";
-    char *token = strtok_r((char*)infos, delimiter, &saveptr);
+    char *token = strtok((char*)infos, delimiter);
     do
     {
         if(NULL != strstr(token, DUMP_INFOS_FIELD[field]))
         {
             break;
         }
-        token = strtok_r(NULL, delimiter, &saveptr);
+        token = strtok(NULL, delimiter);
     } while(NULL != token);
 
     if(NULL == token)
@@ -461,8 +459,8 @@ uint8_t rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, c
         return CODE_RETURN_ERROR;
     }
     char *tmp;
-    tmp = strtok_r(token, "=", &saveptr);
-    tmp = strtok_r(NULL, "=", &saveptr);
+    tmp = strtok(token, "=");
+    tmp = strtok(NULL, "=");
     if(NULL == tmp)
     {
         return CODE_RETURN_ERROR;
