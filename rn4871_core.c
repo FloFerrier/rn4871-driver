@@ -27,8 +27,8 @@ static const char DUMP_INFOS_FIELD[][10] =
 
 static uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const char *format, ...);
 static uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *response);
-static uint8_t rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, char *result);
-static uint8_t rn4871ParseFirmwareVersion(const char *firmwareVersion, char *result);
+static uint8_t rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, char *result, uint16_t resultMaxLen);
+static uint8_t rn4871ParseFirmwareVersion(const char *firmwareVersion, char *result, uint16_t resultMaxLen);
 
 uint8_t rn4871Init(struct rn4871_dev_s *dev)
 {
@@ -345,7 +345,7 @@ uint8_t rn4871SetDeviceName(struct rn4871_dev_s *dev, const char *deviceName)
     return ret;
 }
 
-uint8_t rn4871GetDeviceName(struct rn4871_dev_s *dev, char *deviceName)
+uint8_t rn4871GetDeviceName(struct rn4871_dev_s *dev, char *deviceName, uint16_t deviceNameMaxLen)
 {
     assert((NULL != dev) || (NULL != deviceName));
 
@@ -355,11 +355,11 @@ uint8_t rn4871GetDeviceName(struct rn4871_dev_s *dev, char *deviceName)
     {
         return ret;
     }
-    ret = rn4871ParseDumpInfos(infos, FIELD_DEVICE_NAME, deviceName);
+    ret = rn4871ParseDumpInfos(infos, FIELD_DEVICE_NAME, deviceName, deviceNameMaxLen);
     return ret;
 }
 
-uint8_t rn4871ParseFirmwareVersion(const char *firmwareVersion, char *result)
+uint8_t rn4871ParseFirmwareVersion(const char *firmwareVersion, char *result, uint16_t resultMaxLen)
 {
     assert((NULL != firmwareVersion) || (NULL != result));
 
@@ -379,12 +379,12 @@ uint8_t rn4871ParseFirmwareVersion(const char *firmwareVersion, char *result)
 
     if(CODE_RETURN_SUCCESS == ret)
     {
-        strncpy(result, token, RN4871_BUFFER_UART_LEN_MAX);
+        strncpy(result, token, resultMaxLen);
     }
     return ret;
 }
 
-uint8_t rn4871GetFirmwareVersion(struct rn4871_dev_s *dev, char *firmwareVersion)
+uint8_t rn4871GetFirmwareVersion(struct rn4871_dev_s *dev, char *firmwareVersion, uint16_t firmwareVersionMaxLen)
 {
     assert((NULL != dev) || (NULL != firmwareVersion));
 
@@ -407,7 +407,7 @@ uint8_t rn4871GetFirmwareVersion(struct rn4871_dev_s *dev, char *firmwareVersion
     {
         return ret;
     }
-    ret = rn4871ParseFirmwareVersion(response, firmwareVersion);
+    ret = rn4871ParseFirmwareVersion(response, firmwareVersion, firmwareVersionMaxLen);
     return ret;
 }
 
@@ -439,7 +439,7 @@ uint8_t rn4871DumpInfos(struct rn4871_dev_s *dev, char *infos)
     return ret;
 }
 
-uint8_t rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, char *result)
+uint8_t rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, char *result, uint16_t resultMaxLen)
 {
     assert((NULL != infos) || (NULL != result));
 
@@ -467,11 +467,11 @@ uint8_t rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, c
     {
         return CODE_RETURN_ERROR;
     }
-    strncpy(result, tmp, RN4871_BUFFER_UART_LEN_MAX);
+    strncpy(result, tmp, resultMaxLen);
     return CODE_RETURN_SUCCESS;
 }
 
-uint8_t rn4871GetMacAddress(struct rn4871_dev_s *dev, char *macAddress)
+uint8_t rn4871GetMacAddress(struct rn4871_dev_s *dev, char *macAddress, uint16_t macAddressMaxLen)
 {
     assert((NULL != dev) || (NULL != macAddress));
 
@@ -481,7 +481,7 @@ uint8_t rn4871GetMacAddress(struct rn4871_dev_s *dev, char *macAddress)
     {
         return ret;
     }
-    ret = rn4871ParseDumpInfos(infos, FIELD_MAC_ADDRESS, macAddress);
+    ret = rn4871ParseDumpInfos(infos, FIELD_MAC_ADDRESS, macAddress, macAddressMaxLen);
     return ret;
 }
 
@@ -496,7 +496,7 @@ uint8_t rn4871GetServices(struct rn4871_dev_s *dev, uint16_t *services)
         return ret;
     }
     char tmp[RN4871_BUFFER_UART_LEN_MAX+1] = "";
-    ret = rn4871ParseDumpInfos(infos, FIELD_SERVICES, tmp);
+    ret = rn4871ParseDumpInfos(infos, FIELD_SERVICES, tmp, RN4871_BUFFER_UART_LEN_MAX);
     *services = (uint16_t)strtol(tmp, NULL, BASE_HEXADECIMAL);
     return ret;
 }
