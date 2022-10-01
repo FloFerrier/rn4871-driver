@@ -291,10 +291,6 @@ uint8_t rn4871RebootModule(struct rn4871_dev_s *dev)
         return ret;
     }
     ret = rn4871ResponseProcess(dev, response);
-    if(CODE_RETURN_SUCCESS != ret)
-    {
-        return ret;
-    }
     return ret;
 }
 
