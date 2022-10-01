@@ -325,7 +325,7 @@ uint8_t rn4871SetDeviceName(struct rn4871_dev_s *dev, const char *deviceName)
     uint16_t responseSize = 0;
 
     uint16_t deviceNameLen = (uint16_t) strlen(deviceName);
-    if((0 >= deviceNameLen) || (DEVICE_NAME_CHARACTER_MAX < deviceNameLen))
+    if((0 >= deviceNameLen) || (DEVICE_NAME_LEN_MAX < deviceNameLen))
     {
         logger(LOG_ERROR, "rn4871SetDeviceName: deviceNameLen is incorrect ... [%d]\r\n", deviceNameLen);
         return CODE_RETURN_ERROR;

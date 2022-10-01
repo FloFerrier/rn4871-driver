@@ -5,19 +5,22 @@
 
 #define RN4871_BUFFER_UART_LEN_MAX (255)
 
-#define DEVICE_NAME_CHARACTER_MAX (20)
+#define DEVICE_NAME_LEN_MAX (20)
+#define MAC_ADDRESS_LEN_MAX (20)
+#define ERROR_CODE_LEN_MAX (20)
+#define COMMAND_LEN_MAX (10)
 
 enum rn4871_code_return_e
 {
-	CODE_RETURN_SUCCESS,
-  	CODE_RETURN_ERROR,
-  	CODE_RETURN_UART_FAIL,
-  	CODE_RETURN_CMD_UNKNOWN,
-  	CODE_RETURN_NO_COMMAND_MODE,
-  	CODE_RETURN_NO_DATA_MODE,
-  	CODE_RETURN_NO_TRANSPARENT_UART,
-  	CODE_RETURN_NO_CONNECTED,
-	CODE_RETURN_NO_STREAMING,
+	CODE_RETURN_SUCCESS = 0,
+	CODE_RETURN_ERROR = 1,
+	CODE_RETURN_UART_FAIL = 2,
+	CODE_RETURN_CMD_UNKNOWN = 3,
+	CODE_RETURN_NO_COMMAND_MODE = 4,
+	CODE_RETURN_NO_DATA_MODE = 5,
+	CODE_RETURN_NO_TRANSPARENT_UART = 6,
+	CODE_RETURN_NO_CONNECTED = 7,
+	CODE_RETURN_NO_STREAMING = 8,
 };
 
 static const char ERROR_CODE[][ERROR_CODE_LEN_MAX] =
@@ -35,22 +38,42 @@ static const char ERROR_CODE[][ERROR_CODE_LEN_MAX] =
 
 enum rn4871_cmd_e
 {
-	CMD_MODE_ENTER, /* $$$ */
-	CMD_MODE_QUIT, /* --- */
-	CMD_REBOOT, /* R */
-	CMD_RESET_FACTORY, /* SF */
-	CMD_SET_BT_NAME, /* S- */
-	CMD_SET_DEVICE_NAME, /* SN */
-	CMD_GET_DEVICE_NAME, /* GN */
-	CMD_SET_SERVICES, /* SS */
-	CMD_DUMP_INFOS, /* D */
-	CMD_GET_VERSION, /* V */
-	CMD_CLEAR_ALL_SERVICES, /* PZ */
-	CMD_CREATE_PRIVATE_SERVICE, /* PS */
-	CMD_CREATE_PRIVATE_CHARACTERISTIC, /* PC */
-	CMD_SERVER_WRITE_CHARACTERISTIC, /* SHW */
-	CMD_SERVER_READ_CHARACTERISTIC, /* SHR */
-  	CMD_NONE,
+	CMD_MODE_ENTER = 0, /* $$$ */
+	CMD_MODE_QUIT = 1, /* --- */
+	CMD_REBOOT = 2, /* R */
+	CMD_RESET_FACTORY = 3, /* SF */
+	CMD_SET_BT_NAME = 4, /* S- */
+	CMD_SET_DEVICE_NAME = 5, /* SN */
+	CMD_GET_DEVICE_NAME = 6, /* GN */
+	CMD_SET_SERVICES = 7, /* SS */
+	CMD_DUMP_INFOS = 8, /* D */
+	CMD_GET_VERSION = 9, /* V */
+	CMD_CLEAR_ALL_SERVICES = 10, /* PZ */
+	CMD_CREATE_PRIVATE_SERVICE = 11, /* PS */
+	CMD_CREATE_PRIVATE_CHARACTERISTIC = 12, /* PC */
+	CMD_SERVER_WRITE_CHARACTERISTIC = 13, /* SHW */
+	CMD_SERVER_READ_CHARACTERISTIC = 15, /* SHR */
+	CMD_NONE = 16,
+};
+
+static const char TABLE_COMMAND[][COMMAND_LEN_MAX] =
+{
+    "$$$",
+    "---",
+    "R",
+    "SF",
+    "S-",
+    "SN",
+    "GN",
+    "SS",
+    "D",
+    "V",
+    "PZ",
+    "PS",
+    "PC",
+    "SHW",
+    "SHR",
+    "",
 };
 
 enum rn4871_mode_e
@@ -75,26 +98,6 @@ enum rn4871_service_e
   	UART_TRANSPARENT = 0x40,
   	BEACON = 0x20,
  	RESERVED = 0x10,
-};
-
-static const char TABLE_COMMAND[][10] =
-{
-	"$$$",
-    "---",
-    "R",
-    "SF",
-    "S-",
-    "SN",
-    "GN",
-    "SS",
-    "D",
-    "V",
-    "PZ",
-    "PS",
-    "PC",
-    "SHW",
-    "SHR",
-    "",
 };
 
 typedef uint8_t (*rn4871_com_fptr_t)(char *buffer, uint16_t *bufferLen);
