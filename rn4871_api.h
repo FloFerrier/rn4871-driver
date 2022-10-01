@@ -41,5 +41,6 @@ uint8_t rn4871TransparentUartSendData(struct rn4871_dev_s *dev, const char *data
 enum rn4871_fsm_e rn4871GetFsmState(struct rn4871_dev_s *dev);
 void rn4871SetForceFsmState(struct rn4871_dev_s *dev, enum rn4871_fsm_e fsmForceState);
 void rn4871SetForceDataMode(struct rn4871_dev_s *dev);
+char* rn4871GetErrorCodeStr(enum rn4871_code_return_e errorCode);
 
 #endif /* RN4871_API_H */

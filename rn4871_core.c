@@ -583,3 +583,8 @@ uint8_t rn4871IsOnTransparentUart(struct rn4871_dev_s *dev, bool *result)
 
     return CODE_RETURN_SUCCESS;
 }
+
+char* rn4871GetErrorCodeStr(enum rn4871_code_return_e errorCode)
+{
+    return ((char*) ERROR_CODE[errorCode]);
+}

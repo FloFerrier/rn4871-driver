@@ -20,6 +20,19 @@ enum rn4871_code_return_e
 	CODE_RETURN_NO_STREAMING,
 };
 
+static const char ERROR_CODE[][ERROR_CODE_LEN_MAX] =
+{
+	"SUCCESS",
+	"ERROR",
+	"UART_FAIL",
+	"COMMAND_UNKNOWN",
+	"NO_COMMAND_MODE",
+	"NO_DATA_MODE",
+	"NO_TRANSPARENT_UART",
+	"NO_CONNECTED",
+	"NO_STREAMING",
+};
+
 enum rn4871_cmd_e
 {
 	CMD_MODE_ENTER, /* $$$ */
