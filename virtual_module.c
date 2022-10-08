@@ -1,40 +1,22 @@
 #include "virtual_module.h"
 #include "rn4871_logger.h"
 
-#define BUFFER_MAX_LEN (255)
-#define MODULE_NAME_LEN (21)
-#define MAC_ADDRESS_LEN (25)
-#define FIRMWARE_VERSION_LEN (5)
-
-struct virtual_module_s
-{
-    char moduleName[MODULE_NAME_LEN+1];
-    char macAddress[MAC_ADDRESS_LEN+1];
-    char firmwareVersion[FIRMWARE_VERSION_LEN+1];
-    uint16_t services;
-};
-
-struct virtual_module_s virtualModule =
-{
-    .moduleName = "RN4871-VM",
-    .macAddress = "001122334455",
-    .firmwareVersion = "V1.40",
-    .services = DEVICE_INFORMATION,
-};
-
-char pGlobalBuffer[BUFFER_MAX_LEN+1] = "";
 char saveBuffer[BUFFER_MAX_LEN+1] = "";
 char tmpBuffer[BUFFER_MAX_LEN+1] = "";
 
-static bool _command_mode = false;
+static enum rn4871_cmd_e getCommand(const char *command);
+static char *parseArgCommand(const char *command);
 
-static enum rn4871_cmd_e getCommand(char *command)
+static enum rn4871_cmd_e getCommand(const char *command)
 {
     assert(NULL != command);
 
+    char tmp[256] = "";
+    strncpy(tmp, command, 255);
+
     char delimiter[] = ",\r\n";
     char *saveptr;
-    char *token = strtok_r(command, delimiter, &saveptr);
+    char *token = strtok_r(tmp, delimiter, &saveptr);
     for(int i=0; i< CMD_NONE; i++)
     {
         if(NULL != token)
@@ -49,13 +31,16 @@ static enum rn4871_cmd_e getCommand(char *command)
     return CMD_NONE;
 }
 
-static char *parseArgCommand(char *command)
+static char *parseArgCommand(const char *command)
 {
     assert(NULL != command);
 
+    char tmp[256] = "";
+    strncpy(tmp, command, 255);
+
     char delimiter[] = ",\r\n";
     char *saveptr;
-    char *token = strtok_r(command, delimiter, &saveptr);
+    char *token = strtok_r(tmp, delimiter, &saveptr);
     if(NULL != token)
     {
         token = strtok_r(NULL, delimiter, &saveptr);
@@ -65,16 +50,27 @@ static char *parseArgCommand(char *command)
     return NULL;
 }
 
-void virtualModuleReceiveData(char *dataReceived, uint16_t dataReceivedLen)
+void virtualModuleInit(struct virtual_module_s *virtualModule)
+{
+    assert(NULL != virtualModule);
+    strcpy(virtualModule->moduleName, "RN4871-VM");
+    strcpy(virtualModule->macAddress, "001122334455");
+    strcpy(virtualModule->firmwareVersion, "V1.40");
+    virtualModule->services = DEVICE_INFORMATION;
+    virtualModule->_command_mode = false;
+    strcpy(virtualModule->_global_buffer, "");
+}
+
+void virtualModuleReceiveData(struct virtual_module_s *virtualModule, const char *dataReceived)
 {
     assert(NULL != dataReceived);
 
-    logger(LOG_DEBUG, "virtualModuleReceiveData: [%d] \"%s\"\r\n", dataReceivedLen, dataReceived);
+    logger(LOG_DEBUG, "virtualModuleReceiveData: \"%s\"\r\n", dataReceived);
 
-    memset(pGlobalBuffer, '\0', BUFFER_MAX_LEN);
+    memset(virtualModule->_global_buffer, '\0', BUFFER_MAX_LEN);
     memset(tmpBuffer, '\0', BUFFER_MAX_LEN);
     static uint8_t cnt_cmd_mode = 0;
-    if(_command_mode)
+    if(virtualModule->_command_mode)
     {
         char *arg;
         strncpy(tmpBuffer, dataReceived, BUFFER_MAX_LEN);
@@ -85,44 +81,45 @@ void virtualModuleReceiveData(char *dataReceived, uint16_t dataReceivedLen)
             {
                 case CMD_MODE_QUIT :
                 {
-                    snprintf(pGlobalBuffer, BUFFER_MAX_LEN, "END\r\n");
-                    _command_mode = false;
+                    snprintf(virtualModule->_global_buffer, BUFFER_MAX_LEN, "END\r\n");
+                    virtualModule->_command_mode = false;
                     break;
                 }
                 case CMD_CLEAR_ALL_SERVICES :
                 {
-                    snprintf(pGlobalBuffer, BUFFER_MAX_LEN, "AOK\r\nCMD>");
+                    snprintf(virtualModule->_global_buffer, BUFFER_MAX_LEN, "AOK\r\nCMD> ");
                     break;
                 }
                 case CMD_RESET_FACTORY :
                 case CMD_REBOOT :
                 {
-                    strncpy(pGlobalBuffer, "Rebooting\r\nCMD>", BUFFER_MAX_LEN);
-                    _command_mode = false;
+                    strncpy(virtualModule->_global_buffer, "Rebooting\r\nCMD> ", BUFFER_MAX_LEN);
+                    virtualModule->_command_mode = false;
                     break;
                 }
                 case CMD_GET_DEVICE_NAME :
                 {
-                    snprintf(pGlobalBuffer, BUFFER_MAX_LEN, "%s\r\nCMD>", virtualModule.moduleName);
+                    snprintf(virtualModule->_global_buffer, BUFFER_MAX_LEN, "%s\r\nCMD> ", virtualModule->moduleName);
+                    break;
                 }
                 case CMD_DUMP_INFOS :
                 {
-                    snprintf(pGlobalBuffer, BUFFER_MAX_LEN,
-                        "BTA=%s\r\nName=%s\r\nConnected=no\r\nAuthen=0\r\nFeatures=0000\r\nServices=%X\r\nCMD>",
-                        virtualModule.macAddress, virtualModule.moduleName, virtualModule.services);
+                    snprintf(virtualModule->_global_buffer, BUFFER_MAX_LEN,
+                        "BTA=%s\r\nName=%s\r\nConnected=no\r\nAuthen=0\r\nFeatures=0000\r\nServices=%X\r\nCMD> ",
+                        virtualModule->macAddress, virtualModule->moduleName, virtualModule->services);
                     break;
                 }
                 case CMD_GET_VERSION :
                 {
-                    snprintf(pGlobalBuffer, BUFFER_MAX_LEN, "RN4871 %s 7/9/2019 (c)Microship Technology Inc\r\nCMD>",
-                        virtualModule.firmwareVersion);
+                    snprintf(virtualModule->_global_buffer, BUFFER_MAX_LEN, "RN4871 %s 7/9/2019 (c)Microship Technology Inc\r\nCMD> ",
+                        virtualModule->firmwareVersion);
                     break;
                 }
                 case CMD_SET_SERVICES :
                 {
                     arg = parseArgCommand(dataReceived);
-                    virtualModule.services = (uint16_t)strtol(arg, NULL, 16);
-                    snprintf(pGlobalBuffer, BUFFER_MAX_LEN, "AOK\r\nCMD>");
+                    virtualModule->services = (uint16_t)strtol(arg, NULL, 16);
+                    snprintf(virtualModule->_global_buffer, BUFFER_MAX_LEN, "AOK\r\nCMD> ");
                     break;
                 }
                 case CMD_SET_DEVICE_NAME :
@@ -130,19 +127,19 @@ void virtualModuleReceiveData(char *dataReceived, uint16_t dataReceivedLen)
                     arg = parseArgCommand(dataReceived);
                     if(BUFFER_MAX_LEN >= strlen(arg))
                     {
-                        strcpy(virtualModule.moduleName, arg);
+                        strcpy(virtualModule->moduleName, arg);
                     }
-                    snprintf(pGlobalBuffer, BUFFER_MAX_LEN, "AOK\r\nCMD>");
+                    snprintf(virtualModule->_global_buffer, BUFFER_MAX_LEN, "AOK\r\nCMD> ");
                     break;
                 }
                 default :
-                    snprintf(pGlobalBuffer, BUFFER_MAX_LEN, "Err\r\nCMD>");
+                    snprintf(virtualModule->_global_buffer, BUFFER_MAX_LEN, "Err\r\nCMD> ");
                     break;
             }
         }
         else
         {
-            snprintf(pGlobalBuffer, BUFFER_MAX_LEN, "Err\r\nCMD>");
+            snprintf(virtualModule->_global_buffer, BUFFER_MAX_LEN, "Err\r\nCMD> ");
         }
     }
     else if(0 == strcmp(dataReceived, "$"))
@@ -150,55 +147,55 @@ void virtualModuleReceiveData(char *dataReceived, uint16_t dataReceivedLen)
         ++cnt_cmd_mode;
         if (3 == cnt_cmd_mode)
         {
-            snprintf(pGlobalBuffer, BUFFER_MAX_LEN, "CMD>");
+            snprintf(virtualModule->_global_buffer, BUFFER_MAX_LEN, "CMD> ");
             cnt_cmd_mode = 0;
-            _command_mode = true;
+            virtualModule->_command_mode = true;
         }
     }
-    /* Data mode */
+    // Data mode
     else
     {
-        strncpy(pGlobalBuffer, dataReceived, BUFFER_MAX_LEN);
+        strncpy(virtualModule->_global_buffer, dataReceived, BUFFER_MAX_LEN);
     }
 }
 
-void virtualModuleSendData(char *dataToSend, uint16_t *dataToSendLen)
+void virtualModuleSendData(struct virtual_module_s *virtualModule, char *dataToSend, uint16_t *dataToSendLen)
 {
     assert((NULL != dataToSend) || (NULL != dataToSendLen));
 
-    strncpy(dataToSend, pGlobalBuffer, BUFFER_MAX_LEN);
-    *dataToSendLen = strnlen(pGlobalBuffer, BUFFER_MAX_LEN);
+    strncpy(dataToSend, virtualModule->_global_buffer, BUFFER_MAX_LEN);
+    *dataToSendLen = strnlen(virtualModule->_global_buffer, BUFFER_MAX_LEN);
     logger(LOG_DEBUG, "virtualModuleSendData: [%d] \"%s\"\r\n", *dataToSendLen, dataToSend);
 }
 
-void virtualModuleConnect(struct rn4871_dev_s *dev)
+/*void virtualModuleConnect(struct rn4871_dev_s *dev)
 {
     assert(NULL != dev);
 
     strncpy(saveBuffer, "\%CONNECT,0,AABBCCDDEEFF\%", BUFFER_MAX_LEN);
     uint16_t bufferLen = strlen(saveBuffer);
     dev->uartTx(saveBuffer, &bufferLen);
-}
+}*/
 
-void virtualModuleStream(struct rn4871_dev_s *dev)
+/*void virtualModuleStream(struct rn4871_dev_s *dev)
 {
     assert(NULL != dev);
 
     strncpy(saveBuffer, "\%STREAM_OPEN\%", BUFFER_MAX_LEN);
     uint16_t bufferLen = strlen(saveBuffer);
     dev->uartTx(saveBuffer, &bufferLen);
-}
+}*/
 
-void virtualModuleDisconnect(struct rn4871_dev_s *dev)
+/*void virtualModuleDisconnect(struct rn4871_dev_s *dev)
 {
     assert(NULL != dev);
 
     strncpy(saveBuffer, "\%DISCONNECT\%", BUFFER_MAX_LEN);
     uint16_t bufferLen = strlen(saveBuffer);
     dev->uartTx(saveBuffer, &bufferLen);
-}
+}*/
 
-void virtualModuleSetForceDataMode(void)
+/*void virtualModuleSetForceDataMode(void)
 {
-    _command_mode = false;
-}
+    virtualModule->_command_mode = false;
+}*/
