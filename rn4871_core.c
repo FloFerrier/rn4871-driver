@@ -138,7 +138,7 @@ uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *response)
 
     logger(LOG_DEBUG, "rn4871ResponseProcess: [%d] \"%s\"\r\n", strlen(response), response);
 
-    if((NULL != strstr(response, "AOK")) || (NULL != strstr(response, "CMD>")) || (NULL != strstr(response, "END")))
+    if((NULL != strstr(response, "AOK")) || (NULL != strstr(response, "CMD>")) || (NULL != strstr(response, "END")) || (NULL != strstr(response, "Rebooting")))
     {
         dev->_fsmState = FSM_STATE_INIT;
 
@@ -183,6 +183,7 @@ uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *response)
                 case CMD_RESET_FACTORY :
                 {
                     dev->_currentMode = DATA_MODE;
+                    dev->_fsmState = FSM_STATE_IDLE;
                     ret = CODE_RETURN_SUCCESS;
                     break;
                 }
@@ -208,7 +209,7 @@ uint8_t rn4871WaitReceivedData(struct rn4871_dev_s *dev, char *receivedData, uin
 
     logger(LOG_DEBUG, "rn4871ReceivedDataProcess: [%d] \"%s\"\r\n", *receivedDataLen, receivedData);
 
-    if(NULL != strstr(receivedData, "REBOOT"))
+    if(NULL != strstr(receivedData, "Rebooting"))
     {
         dev->_fsmState = FSM_STATE_IDLE;
     }
