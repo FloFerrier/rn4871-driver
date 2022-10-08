@@ -1,9 +1,6 @@
-set(TARGET_LIB rn4871-driver)
+include(cmake/cmocka.cmake)
 
-set(SOURCE_FILES
-	rn4871_core.c
-	rn4871_logger.c
-	virtual_module.c
-)
+set(RN4871_CORE_INC "${CMAKE_CURRENT_SOURCE_DIR}/Core/inc")
 
-add_library(${TARGET_LIB} STATIC ${SOURCE_FILES})
+add_subdirectory(Core)
+add_subdirectory(Test)
