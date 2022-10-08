@@ -346,6 +346,21 @@ uint8_t rn4871SetDeviceName(struct rn4871_dev_s *dev, const char *deviceName)
     return ret;
 }
 
+uint8_t rn4871SetConfig(struct rn4871_dev_s *dev, struct rn4871_conf_s *config)
+{
+    assert((NULL != dev) || (NULL != config));
+
+    uint8_t ret = CODE_RETURN_ERROR;
+    ret = rn4871SetDeviceName(dev, config->deviceName);
+    if(CODE_RETURN_SUCCESS != ret)
+    {
+        return ret;
+    }
+
+    ret = rn4871SetServices(dev, config->services);
+    return ret;
+}
+
 uint8_t rn4871GetDeviceName(struct rn4871_dev_s *dev, char *deviceName, uint16_t deviceNameMaxLen)
 {
     assert((NULL != dev) || (NULL != deviceName));
@@ -519,6 +534,43 @@ uint8_t rn4871EraseAllGattServices(struct rn4871_dev_s *dev)
         return ret;
     }
     ret = rn4871ResponseProcess(dev, response);
+    return ret;
+}
+
+uint8_t rn4871GetConfig(struct rn4871_dev_s *dev, struct rn4871_conf_s *config)
+{
+    assert((NULL != dev) || (NULL != config));
+
+    uint8_t ret = CODE_RETURN_ERROR;
+    char infos[RN4871_BUFFER_UART_LEN_MAX+1] = "";
+    ret = rn4871DumpInfos(dev, infos);
+    if(CODE_RETURN_SUCCESS != ret)
+    {
+        return ret;
+    }
+    char save[RN4871_BUFFER_UART_LEN_MAX+1] = "";
+    strncpy(save, infos, RN4871_BUFFER_UART_LEN_MAX);
+
+    char tmp[RN4871_BUFFER_UART_LEN_MAX+1] = "";
+    ret = rn4871ParseDumpInfos(save, FIELD_SERVICES, tmp, RN4871_BUFFER_UART_LEN_MAX);
+    if(CODE_RETURN_SUCCESS != ret)
+    {
+        return ret;
+    }
+    strncpy(save, infos, RN4871_BUFFER_UART_LEN_MAX);
+    config->services = (uint16_t)strtol(tmp, NULL, BASE_HEXADECIMAL);
+    ret = rn4871ParseDumpInfos(save, FIELD_MAC_ADDRESS, config->macAddress, MAC_ADDRESS_LEN_MAX);
+    if(CODE_RETURN_SUCCESS != ret)
+    {
+        return ret;
+    }
+    strncpy(save, infos, RN4871_BUFFER_UART_LEN_MAX);
+    ret = rn4871ParseDumpInfos(save, FIELD_DEVICE_NAME, config->deviceName, DEVICE_NAME_LEN_MAX);
+    if(CODE_RETURN_SUCCESS != ret)
+    {
+        return ret;
+    }
+    ret = rn4871GetFirmwareVersion(dev, config->firmwareVersion, FW_VERSION_LEN_MAX);
     return ret;
 }
 

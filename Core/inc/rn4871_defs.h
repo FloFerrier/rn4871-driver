@@ -7,6 +7,7 @@
 
 #define DEVICE_NAME_LEN_MAX (20)
 #define MAC_ADDRESS_LEN_MAX (20)
+#define FW_VERSION_LEN_MAX (5)
 #define ERROR_CODE_LEN_MAX (20)
 #define COMMAND_LEN_MAX (10)
 

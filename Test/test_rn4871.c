@@ -189,6 +189,41 @@ void test_rn4871SetDeviceName(void **state)
     assert_int_equal(rn4871SetDeviceName(dev, deviceName), CODE_RETURN_SUCCESS);
 }
 
+void test_rn4871SetConfig(void **state)
+{
+    struct rn4871_dev_s *dev = *state;
+    struct rn4871_conf_s config =
+    { .deviceName = "RN4871-Test", .services = 0xC0};
+
+    assert_int_equal(rn4871SetConfig(dev, &config), CODE_RETURN_NO_COMMAND_MODE);
+
+    mock_rn4871EnterCommandMode(dev);
+
+    mock_rn4871UartTxCb("SN,RN4871-Test\r\n", CODE_RETURN_UART_FAIL);
+    assert_int_equal(rn4871SetConfig(dev, &config), CODE_RETURN_UART_FAIL);
+
+    mock_rn4871UartTxCb("SN,RN4871-Test\r\n", CODE_RETURN_SUCCESS);
+    mock_rn4871UartRxCb("Err\r\nCMD>", CODE_RETURN_SUCCESS);
+    assert_int_equal(rn4871SetConfig(dev, &config), CODE_RETURN_ERROR);
+
+    mock_rn4871UartTxCb("SN,RN4871-Test\r\n", CODE_RETURN_SUCCESS);
+    mock_rn4871UartRxCb("AOK\r\nCMD>", CODE_RETURN_SUCCESS);
+    mock_rn4871UartTxCb("SS,C0\r\n", CODE_RETURN_UART_FAIL);
+    assert_int_equal(rn4871SetConfig(dev, &config), CODE_RETURN_UART_FAIL);
+
+    mock_rn4871UartTxCb("SN,RN4871-Test\r\n", CODE_RETURN_SUCCESS);
+    mock_rn4871UartRxCb("AOK\r\nCMD>", CODE_RETURN_SUCCESS);
+    mock_rn4871UartTxCb("SS,C0\r\n", CODE_RETURN_SUCCESS);
+    mock_rn4871UartRxCb("Err\r\nCMD>", CODE_RETURN_SUCCESS);
+    assert_int_equal(rn4871SetConfig(dev, &config), CODE_RETURN_ERROR);
+
+    mock_rn4871UartTxCb("SN,RN4871-Test\r\n", CODE_RETURN_SUCCESS);
+    mock_rn4871UartRxCb("AOK\r\nCMD>", CODE_RETURN_SUCCESS);
+    mock_rn4871UartTxCb("SS,C0\r\n", CODE_RETURN_SUCCESS);
+    mock_rn4871UartRxCb("AOK\r\nCMD>", CODE_RETURN_SUCCESS);
+    assert_int_equal(rn4871SetConfig(dev, &config), CODE_RETURN_SUCCESS);
+}
+
 void test_rn4871EraseAllGattServices(void **state)
 {
     struct rn4871_dev_s *dev = *state;
@@ -378,6 +413,55 @@ void test_rn4871GetMacAddress(void **state)
     mock_rn4871UartRxCb("BTA=001122334455\r\nName=test_rn4871\r\nConnected=no\r\nAuthen=0\r\nFeatures=0000\r\nServices=00\r\nCMD>", CODE_RETURN_SUCCESS);
     assert_int_equal(rn4871GetMacAddress(dev, macAddress, BUFFER_SIZE_MAX-1), CODE_RETURN_SUCCESS);
     assert_string_equal(macAddress, "001122334455");
+}
+
+void test_rn4871GetConfig(void **state)
+{
+    struct rn4871_dev_s *dev = *state;
+    struct rn4871_conf_s config =
+    { .deviceName = "", .services = 0x00, .firmwareVersion="", .macAddress = ""};
+
+    assert_int_equal(rn4871GetConfig(dev, &config), CODE_RETURN_NO_COMMAND_MODE);
+
+    mock_rn4871EnterCommandMode(dev);
+
+    mock_rn4871UartTxCb("D\r\n", CODE_RETURN_UART_FAIL);
+    assert_int_equal(rn4871GetConfig(dev, &config), CODE_RETURN_UART_FAIL);
+
+    mock_rn4871UartTxCb("D\r\n", CODE_RETURN_SUCCESS);
+    mock_rn4871UartRxCb("Err\r\nCMD>", CODE_RETURN_SUCCESS);
+    assert_int_equal(rn4871GetConfig(dev, &config), CODE_RETURN_ERROR);
+
+    mock_rn4871UartTxCb("D\r\n", CODE_RETURN_SUCCESS);
+    mock_rn4871UartRxCb("AOK\r\nCMD>", CODE_RETURN_SUCCESS);
+    assert_int_equal(rn4871GetConfig(dev, &config), CODE_RETURN_ERROR);
+
+    mock_rn4871UartTxCb("D\r\n", CODE_RETURN_SUCCESS);
+    mock_rn4871UartRxCb("BTA=001122334455\r\nName=test_rn4871\r\nConnected=no\r\nAuthen=0\r\nFeatures=0000\r\nServices=C0\r\nCMD>", CODE_RETURN_SUCCESS);
+    mock_rn4871UartTxCb("V\r\n", CODE_RETURN_UART_FAIL);
+    assert_int_equal(rn4871GetConfig(dev, &config), CODE_RETURN_UART_FAIL);
+
+    mock_rn4871UartTxCb("D\r\n", CODE_RETURN_SUCCESS);
+    mock_rn4871UartRxCb("BTA=001122334455\r\nName=test_rn4871\r\nConnected=no\r\nAuthen=0\r\nFeatures=0000\r\nServices=C0\r\nCMD>", CODE_RETURN_SUCCESS);
+    mock_rn4871UartTxCb("V\r\n", CODE_RETURN_SUCCESS);
+    mock_rn4871UartRxCb("Err\r\nCMD>", CODE_RETURN_SUCCESS);
+    assert_int_equal(rn4871GetConfig(dev, &config), CODE_RETURN_ERROR);
+
+    mock_rn4871UartTxCb("D\r\n", CODE_RETURN_SUCCESS);
+    mock_rn4871UartRxCb("BTA=001122334455\r\nName=test_rn4871\r\nConnected=no\r\nAuthen=0\r\nFeatures=0000\r\nServices=C0\r\nCMD>", CODE_RETURN_SUCCESS);
+    mock_rn4871UartTxCb("V\r\n", CODE_RETURN_SUCCESS);
+    mock_rn4871UartRxCb("AOK\r\nCMD>", CODE_RETURN_SUCCESS);
+    assert_int_equal(rn4871GetConfig(dev, &config), CODE_RETURN_ERROR);
+
+    mock_rn4871UartTxCb("D\r\n", CODE_RETURN_SUCCESS);
+    mock_rn4871UartRxCb("BTA=001122334455\r\nName=test_rn4871\r\nConnected=no\r\nAuthen=0\r\nFeatures=0000\r\nServices=C0\r\nCMD>", CODE_RETURN_SUCCESS);
+    mock_rn4871UartTxCb("V\r\n", CODE_RETURN_SUCCESS);
+    mock_rn4871UartRxCb("RN4871 V1.40 7/9/2019 (c)Microship Technology Inc\r\nCMD>", CODE_RETURN_SUCCESS);
+    assert_int_equal(rn4871GetConfig(dev, &config), CODE_RETURN_SUCCESS);
+    assert_string_equal(config.deviceName, "test_rn4871");
+    assert_int_equal(config.services, 0xC0);
+    assert_string_equal(config.firmwareVersion, "V1.40");
+    assert_string_equal(config.macAddress, "001122334455");
 }
 
 void test_rn4871IsOnTransparentUart(void **state)
