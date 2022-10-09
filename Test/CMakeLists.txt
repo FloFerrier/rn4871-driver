@@ -1,29 +1,29 @@
-set(TARGET "Rn4871")
-
+set(CMAKE_C_EXTENSIONS ON)
 include(CTest)
+include(cmake/cmocka.cmake)
 
-set(TEST_TARGET "${TARGET}_test" CACHE INTERNAL "")
+set(TARGET_NAME "Rn4871_Test")
 
 include_directories(${RN4871_CORE_INC})
 
-add_executable(${TEST_TARGET}
+add_executable(${TARGET_NAME}
     main_test.c
     test_rn4871.c
     test_virtual_module.c
     mock_rn4871.c
 )
 
-target_link_libraries(${TEST_TARGET} PRIVATE rn4871-driver)
+target_link_libraries(${TARGET_NAME} PRIVATE rn4871-driver)
 
-target_compile_options(${TEST_TARGET} PRIVATE
+target_compile_options(${TARGET_NAME} PRIVATE
     --coverage
 )
 
-target_link_options(${TEST_TARGET} PRIVATE
+target_link_options(${TARGET_NAME} PRIVATE
     --coverage
 )
 
-target_link_libraries(${TEST_TARGET} PRIVATE rn4871-driver cmocka-static)
+target_link_libraries(${TARGET_NAME} PRIVATE rn4871-driver cmocka-static)
 
 enable_testing()
-add_test(NAME ${TEST_TARGET} COMMAND ${TEST_TARGET})
+add_test(NAME ${TARGET_NAME} COMMAND ${TARGET_NAME})
