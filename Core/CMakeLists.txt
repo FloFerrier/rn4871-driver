@@ -9,3 +9,7 @@ set(SOURCE_FILES
 )
 
 add_library(${TARGET_LIB} STATIC ${SOURCE_FILES})
+
+if(${RN4871_UTEST})
+	target_compile_options(${TARGET_LIB} PRIVATE --coverage)
+endif()
