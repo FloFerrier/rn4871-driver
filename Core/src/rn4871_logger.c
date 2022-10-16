@@ -7,7 +7,7 @@
 
 char logBuffer[LOG_BUFFER_LEN_MAX+1] = "";
 
-void logger(enum log_level_e level, const char *message, ...)
+void logger(RN4871_LOG_LEVEL level, const char *message, ...)
 {
     assert(NULL != message);
 

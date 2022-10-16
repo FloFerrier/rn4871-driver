@@ -9,13 +9,13 @@
 
 #include "rn4871_api.h"
 
-void mock_rn4871UartTxCb(char *buffer, uint8_t codeReturn);
-void mock_rn4871UartRxCb(char *buffer, uint8_t codeReturn);
+void mock_rn4871UartTxCb(char *buffer, RN4871_CODE_RETURN codeReturn);
+void mock_rn4871UartRxCb(char *buffer, RN4871_CODE_RETURN codeReturn);
 
-void mock_rn4871EnterCommandMode(struct rn4871_dev_s *dev);
-void mock_rn4871WaitReceivedData(struct rn4871_dev_s *dev, char *mockReceivedData);
-void mock_rn4871QuitCommandMode(struct rn4871_dev_s *dev);
-void mock_rn4871RebootModule(struct rn4871_dev_s *dev);
-void mock_rn4871IsOnTransparentUart(struct rn4871_dev_s *dev);
+void mock_rn4871EnterCommandMode(RN4871_DEV *dev);
+void mock_rn4871WaitReceivedData(RN4871_DEV *dev, char *mockReceivedData);
+void mock_rn4871QuitCommandMode(RN4871_DEV *dev);
+void mock_rn4871RebootModule(RN4871_DEV *dev);
+void mock_rn4871IsOnTransparentUart(RN4871_DEV *dev);
 
 #endif /* MOCK_RN4871_H */

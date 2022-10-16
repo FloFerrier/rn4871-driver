@@ -101,7 +101,13 @@ enum rn4871_service_e
  	RESERVED = 0x10,
 };
 
-typedef uint8_t (*rn4871_com_fptr_t)(char *buffer, uint16_t *bufferLen);
+typedef enum rn4871_code_return_e RN4871_CODE_RETURN;
+typedef enum rn4871_cmd_e RN4871_CMD;
+typedef enum rn4871_mode_e RN4871_MODE;
+typedef enum rn4871_fsm_e RN4871_FSM;
+typedef enum rn4871_service_e RN4871_SERVICE;
+
+typedef RN4871_CODE_RETURN (*rn4871_com_fptr_t)(char *buffer, uint16_t *bufferLen);
 
 typedef void (*rn4871_delay_fptr_t)(uint32_t delay);
 

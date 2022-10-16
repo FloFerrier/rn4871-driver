@@ -1,13 +1,12 @@
 #include "virtual_module.h"
 #include "rn4871_logger.h"
 
-char saveBuffer[BUFFER_MAX_LEN+1] = "";
 char tmpBuffer[BUFFER_MAX_LEN+1] = "";
 
-static enum rn4871_cmd_e getCommand(const char *command);
+static RN4871_CMD getCommand(const char *command);
 static char *parseArgCommand(const char *command);
 
-static enum rn4871_cmd_e getCommand(const char *command)
+static RN4871_CMD getCommand(const char *command)
 {
     assert(NULL != command);
 
@@ -50,18 +49,19 @@ static char *parseArgCommand(const char *command)
     return NULL;
 }
 
-void virtualModuleInit(struct virtual_module_s *virtualModule)
+void virtualModuleInit(VIRTUAL_MODULE *virtualModule)
 {
     assert(NULL != virtualModule);
-    strcpy(virtualModule->moduleName, "RN4871-VM");
+    strcpy(virtualModule->moduleName, "RN4871-virtualModule");
     strcpy(virtualModule->macAddress, "001122334455");
     strcpy(virtualModule->firmwareVersion, "V1.40");
     virtualModule->services = DEVICE_INFORMATION;
     virtualModule->_command_mode = false;
-    strcpy(virtualModule->_global_buffer, "");
+    memset(virtualModule->_global_buffer, '\0', BUFFER_MAX_LEN);
+    memset(virtualModule->_uartTx, '\0', BUFFER_MAX_LEN);
 }
 
-void virtualModuleReceiveData(struct virtual_module_s *virtualModule, const char *dataReceived)
+void virtualModuleReceiveData(VIRTUAL_MODULE *virtualModule, const char *dataReceived)
 {
     assert(NULL != dataReceived);
 
@@ -74,7 +74,7 @@ void virtualModuleReceiveData(struct virtual_module_s *virtualModule, const char
     {
         char *arg;
         strncpy(tmpBuffer, dataReceived, BUFFER_MAX_LEN);
-        enum rn4871_cmd_e command = getCommand(tmpBuffer);
+        RN4871_CMD command = getCommand(tmpBuffer);
         if(CMD_NONE != command)
         {
             switch(command)
@@ -159,7 +159,7 @@ void virtualModuleReceiveData(struct virtual_module_s *virtualModule, const char
     }
 }
 
-void virtualModuleSendData(struct virtual_module_s *virtualModule, char *dataToSend, uint16_t *dataToSendLen)
+void virtualModuleSendData(VIRTUAL_MODULE *virtualModule, char *dataToSend, uint16_t *dataToSendLen)
 {
     assert((NULL != dataToSend) || (NULL != dataToSendLen));
 
@@ -168,34 +168,37 @@ void virtualModuleSendData(struct virtual_module_s *virtualModule, char *dataToS
     logger(LOG_DEBUG, "virtualModuleSendData: [%d] \"%s\"\r\n", *dataToSendLen, dataToSend);
 }
 
-/*void virtualModuleConnect(struct rn4871_dev_s *dev)
+RN4871_CODE_RETURN virtualModuleConnect(VIRTUAL_MODULE *virtualModule, RN4871_DEV *dev)
 {
-    assert(NULL != dev);
+    assert((NULL != virtualModule) || (NULL != dev));
 
-    strncpy(saveBuffer, "\%CONNECT,0,AABBCCDDEEFF\%", BUFFER_MAX_LEN);
-    uint16_t bufferLen = strlen(saveBuffer);
-    dev->uartTx(saveBuffer, &bufferLen);
-}*/
+    strncpy(virtualModule->_uartTx, "\%CONNECT,0,AABBCCDDEEFF\%", BUFFER_MAX_LEN);
+    uint16_t bufferLen = strlen(virtualModule->_uartTx);
+    RN4871_CODE_RETURN result = dev->uartTx(virtualModule->_uartTx, &bufferLen);
+    return result;
+}
 
-/*void virtualModuleStream(struct rn4871_dev_s *dev)
+RN4871_CODE_RETURN virtualModuleStream(VIRTUAL_MODULE *virtualModule, RN4871_DEV *dev)
 {
-    assert(NULL != dev);
+    assert((NULL != virtualModule) || (NULL != dev));
 
-    strncpy(saveBuffer, "\%STREAM_OPEN\%", BUFFER_MAX_LEN);
-    uint16_t bufferLen = strlen(saveBuffer);
-    dev->uartTx(saveBuffer, &bufferLen);
-}*/
+    strncpy(virtualModule->_uartTx, "\%STREAM_OPEN\%", BUFFER_MAX_LEN);
+    uint16_t bufferLen = strlen(virtualModule->_uartTx);
+    RN4871_CODE_RETURN result = dev->uartTx(virtualModule->_uartTx, &bufferLen);
+    return result;
+}
 
-/*void virtualModuleDisconnect(struct rn4871_dev_s *dev)
+RN4871_CODE_RETURN virtualModuleDisconnect(VIRTUAL_MODULE *virtualModule, RN4871_DEV *dev)
 {
-    assert(NULL != dev);
+    assert((NULL != virtualModule) || (NULL != dev));
 
-    strncpy(saveBuffer, "\%DISCONNECT\%", BUFFER_MAX_LEN);
-    uint16_t bufferLen = strlen(saveBuffer);
-    dev->uartTx(saveBuffer, &bufferLen);
-}*/
+    strncpy(virtualModule->_uartTx, "\%DISCONNECT\%", BUFFER_MAX_LEN);
+    uint16_t bufferLen = strlen(virtualModule->_uartTx);
+    RN4871_CODE_RETURN result = dev->uartTx(virtualModule->_uartTx, &bufferLen);
+    return result;
+}
 
-/*void virtualModuleSetForceDataMode(void)
+void virtualModuleSetForceDataMode(VIRTUAL_MODULE *virtualModule)
 {
     virtualModule->_command_mode = false;
-}*/
+}

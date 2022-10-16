@@ -10,7 +10,9 @@ enum log_level_e
     LOG_INFO = 0x4,
 };
 
-void logger(enum log_level_e level, const char *message, ...);
+typedef enum log_level_e RN4871_LOG_LEVEL;
+
+void logger(RN4871_LOG_LEVEL level, const char *message, ...);
 
 extern void rn4871LogSender(char *log, int logLen);
 

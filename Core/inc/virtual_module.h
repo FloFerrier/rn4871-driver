@@ -22,14 +22,17 @@ struct virtual_module_s
     uint16_t services;
     bool _command_mode;
     char _global_buffer[BUFFER_MAX_LEN+1];
+    char _uartTx[BUFFER_MAX_LEN+1];
 };
 
-void virtualModuleInit(struct virtual_module_s *virtualModule);
-void virtualModuleReceiveData(struct virtual_module_s *virtualModule, const char *dataReceived);
-void virtualModuleSendData(struct virtual_module_s *virtualModule, char *dataToSend, uint16_t *dataToSendLen);
-void virtualModuleConnect(struct rn4871_dev_s *dev);
-void virtualModuleStream(struct rn4871_dev_s *dev);
-void virtualModuleDisconnect(struct rn4871_dev_s *dev);
-void virtualModuleSetForceDataMode(void);
+typedef struct virtual_module_s VIRTUAL_MODULE;
+
+void virtualModuleInit(VIRTUAL_MODULE *virtualModule);
+void virtualModuleReceiveData(VIRTUAL_MODULE *virtualModule, const char *dataReceived);
+void virtualModuleSendData(VIRTUAL_MODULE*virtualModule, char *dataToSend, uint16_t *dataToSendLen);
+RN4871_CODE_RETURN virtualModuleConnect(VIRTUAL_MODULE *virtualModule, RN4871_DEV *dev);
+RN4871_CODE_RETURN virtualModuleStream(VIRTUAL_MODULE *virtualModule, RN4871_DEV *dev);
+RN4871_CODE_RETURN virtualModuleDisconnect(VIRTUAL_MODULE *virtualModule, RN4871_DEV *dev);
+void virtualModuleSetForceDataMode(VIRTUAL_MODULE *virtualModule);
 
 #endif /* VIRTUAL_MODULE_H */

@@ -6,21 +6,21 @@
 #include "test_rn4871.h"
 #include "test_virtual_module.h"
 
-uint8_t rn4871UartTxCb(char *buf, uint16_t *len)
+RN4871_CODE_RETURN rn4871UartTxCb(char *buf, uint16_t *len)
 {
     uint16_t size = *len;
     check_expected(buf);
     check_expected(size);
-    return mock_type(uint8_t);
+    return mock_type(RN4871_CODE_RETURN);
 }
 
-uint8_t rn4871UartRxCb(char *buf, uint16_t *len)
+RN4871_CODE_RETURN rn4871UartRxCb(char *buf, uint16_t *len)
 {
 	char *tmp;
     tmp = mock_type(char*);
     *len = (uint16_t) strlen(tmp);
 	memcpy(buf, tmp, *len);
-    return mock_type(uint8_t);
+    return mock_type(RN4871_CODE_RETURN);
 }
 
 void rn4871LogSender(char *log, int len)
@@ -35,7 +35,7 @@ void rn4871DelayMsCb(uint32_t delay)
 
 int setup(void **state)
 {
-    struct rn4871_dev_s *dev = malloc(sizeof(struct rn4871_dev_s));
+    RN4871_DEV *dev = malloc(sizeof(RN4871_DEV));
     dev->delayMs = rn4871DelayMsCb;
 	dev->uartRx = rn4871UartRxCb;
     dev->uartTx = rn4871UartTxCb;
@@ -81,6 +81,10 @@ int main()
         cmocka_unit_test(test_virtualModuleInit),
         cmocka_unit_test(test_virtualModuleReceiveData),
         cmocka_unit_test(test_virtualModuleSendData),
+        cmocka_unit_test_setup_teardown(test_virtualModuleConnect, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_virtualModuleStream, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_virtualModuleDisconnect, setup, teardown),
+        cmocka_unit_test(test_virtualModuleSetForceDataMode),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

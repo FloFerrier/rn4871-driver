@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-void mock_rn4871UartTxCb(char *buffer, uint8_t codeReturn)
+void mock_rn4871UartTxCb(char *buffer, RN4871_CODE_RETURN codeReturn)
 {
     uint16_t len = strlen(buffer);
     expect_value(rn4871UartTxCb, size, len);
@@ -12,13 +12,13 @@ void mock_rn4871UartTxCb(char *buffer, uint8_t codeReturn)
     will_return(rn4871UartTxCb, codeReturn);
 }
 
-void mock_rn4871UartRxCb(char *buffer, uint8_t codeReturn)
+void mock_rn4871UartRxCb(char *buffer, RN4871_CODE_RETURN codeReturn)
 {
     will_return(rn4871UartRxCb, buffer);
     will_return(rn4871UartRxCb, codeReturn);
 }
 
-void mock_rn4871EnterCommandMode(struct rn4871_dev_s *dev)
+void mock_rn4871EnterCommandMode(RN4871_DEV *dev)
 {
     mock_rn4871UartTxCb("$", CODE_RETURN_SUCCESS);
     mock_rn4871UartTxCb("$", CODE_RETURN_SUCCESS);
@@ -27,7 +27,7 @@ void mock_rn4871EnterCommandMode(struct rn4871_dev_s *dev)
     assert_int_equal(rn4871EnterCommandMode(dev), CODE_RETURN_SUCCESS);
 }
 
-void mock_rn4871WaitReceivedData(struct rn4871_dev_s *dev, char *mockReceivedData)
+void mock_rn4871WaitReceivedData(RN4871_DEV *dev, char *mockReceivedData)
 {
     char receivedData[BUFFER_SIZE_MAX] = "";
     uint16_t receivedDataLen = 0;
@@ -37,21 +37,21 @@ void mock_rn4871WaitReceivedData(struct rn4871_dev_s *dev, char *mockReceivedDat
     assert_int_equal(receivedDataLen, strlen(mockReceivedData));
 }
 
-void mock_rn4871QuitCommandMode(struct rn4871_dev_s *dev)
+void mock_rn4871QuitCommandMode(RN4871_DEV *dev)
 {
     mock_rn4871UartTxCb("---\r\n", CODE_RETURN_SUCCESS);
     mock_rn4871UartRxCb("AOK\r\nCMD>", CODE_RETURN_SUCCESS);
     assert_int_equal(rn4871QuitCommandMode(dev), CODE_RETURN_SUCCESS);
 }
 
-void mock_rn4871RebootModule(struct rn4871_dev_s *dev)
+void mock_rn4871RebootModule(RN4871_DEV *dev)
 {
     mock_rn4871UartTxCb("R,1\r\n", CODE_RETURN_SUCCESS);
     mock_rn4871UartRxCb("AOK\r\nCMD>", CODE_RETURN_SUCCESS);
     assert_int_equal(rn4871RebootModule(dev), CODE_RETURN_SUCCESS);
 }
 
-void mock_rn4871IsOnTransparentUart(struct rn4871_dev_s *dev)
+void mock_rn4871IsOnTransparentUart(RN4871_DEV *dev)
 {
     bool result = false;
     mock_rn4871UartTxCb("D\r\n", CODE_RETURN_SUCCESS);

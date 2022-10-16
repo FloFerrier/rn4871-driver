@@ -30,30 +30,33 @@ struct rn4871_dev_s
     enum rn4871_fsm_e _fsmState;
 };
 
-uint8_t rn4871Init(struct rn4871_dev_s *dev);
-uint8_t rn4871WaitReceivedData(struct rn4871_dev_s *dev, char *receivedData, uint16_t *receivedDataLen);
-uint8_t rn4871EnterCommandMode(struct rn4871_dev_s *dev);
-uint8_t rn4871QuitCommandMode(struct rn4871_dev_s *dev);
-uint8_t rn4871RebootModule(struct rn4871_dev_s *dev);
-uint8_t rn4871TransparentUartSendData(struct rn4871_dev_s *dev, const char *dataToSend, uint16_t dataToSendLen);
+typedef struct rn4871_dev_s RN4871_DEV;
+typedef struct rn4871_conf_s RN4871_CONF;
+
+RN4871_CODE_RETURN rn4871Init(RN4871_DEV*dev);
+RN4871_CODE_RETURN rn4871WaitReceivedData(RN4871_DEV *dev, char *receivedData, uint16_t *receivedDataLen);
+RN4871_CODE_RETURN rn4871EnterCommandMode(RN4871_DEV *dev);
+RN4871_CODE_RETURN rn4871QuitCommandMode(RN4871_DEV *dev);
+RN4871_CODE_RETURN rn4871RebootModule(RN4871_DEV *dev);
+RN4871_CODE_RETURN rn4871TransparentUartSendData(RN4871_DEV *dev, const char *dataToSend, uint16_t dataToSendLen);
 
 /* Setter functions */
-uint8_t rn4871SetServices(struct rn4871_dev_s *dev, uint16_t service);
-uint8_t rn4871SetDeviceName(struct rn4871_dev_s *dev, const char *deviceName);
-uint8_t rn4871EraseAllGattServices(struct rn4871_dev_s *dev);
-uint8_t rn4871SetConfig(struct rn4871_dev_s *dev, struct rn4871_conf_s *config);
-void rn4871SetForceFsmState(struct rn4871_dev_s *dev, enum rn4871_fsm_e fsmForceState);
-void rn4871SetForceDataMode(struct rn4871_dev_s *dev);
+RN4871_CODE_RETURN rn4871SetServices(RN4871_DEV *dev, uint16_t service);
+RN4871_CODE_RETURN rn4871SetDeviceName(RN4871_DEV *dev, const char *deviceName);
+RN4871_CODE_RETURN rn4871EraseAllGattServices(RN4871_DEV *dev);
+RN4871_CODE_RETURN rn4871SetConfig(RN4871_DEV *dev, RN4871_CONF *config);
+void rn4871SetForceFsmState(RN4871_DEV *dev, RN4871_FSM fsmForceState);
+void rn4871SetForceDataMode(RN4871_DEV *dev);
 
 /* Getter functions */
-uint8_t rn4871GetServices(struct rn4871_dev_s *dev, uint16_t *services);
-uint8_t rn4871GetDeviceName(struct rn4871_dev_s *dev, char *deviceName, uint16_t deviceNameMaxLen);
-uint8_t rn4871GetFirmwareVersion(struct rn4871_dev_s *dev, char *firmwareVersion, uint16_t deviceNameMaxLen);
-uint8_t rn4871DumpInfos(struct rn4871_dev_s *dev, char *infos);
-uint8_t rn4871GetMacAddress(struct rn4871_dev_s *dev, char *macAddress, uint16_t deviceNameMaxLen);
-uint8_t rn4871GetConfig(struct rn4871_dev_s *dev, struct rn4871_conf_s *config);
-uint8_t rn4871IsOnTransparentUart(struct rn4871_dev_s *dev, bool *result);
-enum rn4871_fsm_e rn4871GetFsmState(struct rn4871_dev_s *dev);
-char* rn4871GetErrorCodeStr(enum rn4871_code_return_e errorCode);
+RN4871_CODE_RETURN rn4871GetServices(RN4871_DEV*dev, uint16_t *services);
+RN4871_CODE_RETURN rn4871GetDeviceName(RN4871_DEV *dev, char *deviceName, uint16_t deviceNameMaxLen);
+RN4871_CODE_RETURN rn4871GetFirmwareVersion(RN4871_DEV *dev, char *firmwareVersion, uint16_t deviceNameMaxLen);
+RN4871_CODE_RETURN rn4871DumpInfos(RN4871_DEV*dev, char *infos);
+RN4871_CODE_RETURN rn4871GetMacAddress(RN4871_DEV*dev, char *macAddress, uint16_t deviceNameMaxLen);
+RN4871_CODE_RETURN rn4871GetConfig(RN4871_DEV *dev, RN4871_CONF *config);
+RN4871_CODE_RETURN rn4871IsOnTransparentUart(RN4871_DEV *dev, bool *result);
+RN4871_FSM rn4871GetFsmState(RN4871_DEV*dev);
+char* rn4871GetErrorCodeStr(RN4871_CODE_RETURN errorCode);
 
 #endif /* RN4871_API_H */

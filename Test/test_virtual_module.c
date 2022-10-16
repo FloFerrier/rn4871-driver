@@ -1,18 +1,20 @@
 #include "test_virtual_module.h"
 
+#include "mock_rn4871.h"
+
 void test_virtualModuleInit(void **state)
 {
-    struct virtual_module_s vm;
+    VIRTUAL_MODULE vm;
     virtualModuleInit(&vm);
     assert_string_equal(vm.firmwareVersion, "V1.40");
-    assert_string_equal(vm.moduleName, "RN4871-VM");
+    assert_string_equal(vm.moduleName, "RN4871-virtualModule");
     assert_string_equal(vm.macAddress, "001122334455");
     assert_int_equal(vm.services, DEVICE_INFORMATION);
 }
 
 void test_virtualModuleReceiveData(void **state)
 {
-    struct virtual_module_s vm;
+    VIRTUAL_MODULE vm;
     virtualModuleInit(&vm);
     assert_false(vm._command_mode);
 
@@ -28,7 +30,7 @@ void test_virtualModuleReceiveData(void **state)
 
     assert_true(vm._command_mode);
     virtualModuleReceiveData(&vm, "D\r\n");
-    assert_string_equal(vm._global_buffer, "BTA=001122334455\r\nName=RN4871-VM\r\nConnected=no\r\nAuthen=0\r\nFeatures=0000\r\nServices=80\r\nCMD> ");
+    assert_string_equal(vm._global_buffer, "BTA=001122334455\r\nName=RN4871-virtualModule\r\nConnected=no\r\nAuthen=0\r\nFeatures=0000\r\nServices=80\r\nCMD> ");
 
     assert_true(vm._command_mode);
     virtualModuleReceiveData(&vm, "V\r\n");
@@ -52,7 +54,7 @@ void test_virtualModuleReceiveData(void **state)
 
     assert_true(vm._command_mode);
     virtualModuleReceiveData(&vm, "GN\r\n");
-    assert_string_equal(vm._global_buffer, "RN4871-VM\r\nCMD> ");
+    assert_string_equal(vm._global_buffer, "RN4871-virtualModule\r\nCMD> ");
 
     assert_true(vm._command_mode);
     virtualModuleReceiveData(&vm, "SN,test\r\n");
@@ -76,7 +78,7 @@ void test_virtualModuleReceiveData(void **state)
 
 void test_virtualModuleSendData(void **state)
 {
-    struct virtual_module_s vm;
+    VIRTUAL_MODULE vm;
     char dataToSend[256] = "";
     uint16_t dataToSendLen = 0;
     virtualModuleSendData(&vm, dataToSend, &dataToSendLen);
@@ -87,4 +89,63 @@ void test_virtualModuleSendData(void **state)
     virtualModuleSendData(&vm, dataToSend, &dataToSendLen);
     assert_string_equal(dataToSend, "Test to send some data");
     assert_int_equal(dataToSendLen, 22);
+}
+
+void test_virtualModuleConnect(void **state)
+{
+    RN4871_DEV *dev = *state;
+    VIRTUAL_MODULE vm;
+
+    mock_rn4871UartTxCb("\%CONNECT,0,AABBCCDDEEFF\%", CODE_RETURN_UART_FAIL);
+    assert_int_equal(virtualModuleConnect(&vm, dev), CODE_RETURN_UART_FAIL);
+
+    mock_rn4871UartTxCb("\%CONNECT,0,AABBCCDDEEFF\%", CODE_RETURN_SUCCESS);
+    assert_int_equal(virtualModuleConnect(&vm, dev), CODE_RETURN_SUCCESS);
+}
+
+void test_virtualModuleStream(void **state)
+{
+    RN4871_DEV *dev = *state;
+    VIRTUAL_MODULE vm;
+
+    mock_rn4871UartTxCb("\%STREAM_OPEN\%", CODE_RETURN_UART_FAIL);
+    assert_int_equal(virtualModuleStream(&vm, dev), CODE_RETURN_UART_FAIL);
+
+    mock_rn4871UartTxCb("\%STREAM_OPEN\%", CODE_RETURN_SUCCESS);
+    assert_int_equal(virtualModuleStream(&vm, dev), CODE_RETURN_SUCCESS);
+}
+
+void test_virtualModuleDisconnect(void **state)
+{
+    RN4871_DEV *dev = *state;
+    VIRTUAL_MODULE vm;
+
+    mock_rn4871UartTxCb("\%DISCONNECT\%", CODE_RETURN_UART_FAIL);
+    assert_int_equal(virtualModuleDisconnect(&vm, dev), CODE_RETURN_UART_FAIL);
+
+    mock_rn4871UartTxCb("\%DISCONNECT\%", CODE_RETURN_SUCCESS);
+    assert_int_equal(virtualModuleDisconnect(&vm, dev), CODE_RETURN_SUCCESS);
+}
+
+void test_virtualModuleSetForceDataMode(void **state)
+{
+    VIRTUAL_MODULE vm;
+
+    virtualModuleInit(&vm);
+    assert_false(vm._command_mode);
+
+    virtualModuleReceiveData(&vm, "$");
+    virtualModuleReceiveData(&vm, "$");
+    virtualModuleReceiveData(&vm, "$");
+    assert_string_equal(vm._global_buffer, "CMD> ");
+    assert_true(vm._command_mode);
+
+    virtualModuleSetForceDataMode(&vm);
+    assert_false(vm._command_mode);
+
+    virtualModuleReceiveData(&vm, "$");
+    virtualModuleReceiveData(&vm, "$");
+    virtualModuleReceiveData(&vm, "$");
+    assert_string_equal(vm._global_buffer, "CMD> ");
+    assert_true(vm._command_mode);
 }

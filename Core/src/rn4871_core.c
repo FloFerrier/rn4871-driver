@@ -25,12 +25,12 @@ static const char DUMP_INFOS_FIELD[][10] =
     "Services=",
 };
 
-static uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const char *format, ...);
-static uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *response);
-static uint8_t rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, char *result, uint16_t resultMaxLen);
-static uint8_t rn4871ParseFirmwareVersion(const char *firmwareVersion, char *result, uint16_t resultMaxLen);
+static RN4871_CODE_RETURN rn4871SendCmd(RN4871_DEV *dev, RN4871_CMD cmd, const char *format, ...);
+static RN4871_CODE_RETURN rn4871ResponseProcess(RN4871_DEV *dev, const char *response);
+static RN4871_CODE_RETURN rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, char *result, uint16_t resultMaxLen);
+static RN4871_CODE_RETURN rn4871ParseFirmwareVersion(const char *firmwareVersion, char *result, uint16_t resultMaxLen);
 
-uint8_t rn4871Init(struct rn4871_dev_s *dev)
+RN4871_CODE_RETURN rn4871Init(RN4871_DEV *dev)
 {
     assert(NULL != dev);
 
@@ -48,7 +48,7 @@ uint8_t rn4871Init(struct rn4871_dev_s *dev)
     return CODE_RETURN_SUCCESS;
 }
 
-uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const char *format, ...)
+RN4871_CODE_RETURN rn4871SendCmd(RN4871_DEV *dev, RN4871_CMD cmd, const char *format, ...)
 {
     assert(NULL != dev);
 
@@ -60,7 +60,7 @@ uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const cha
 
 	char command[RN4871_BUFFER_UART_LEN_MAX+1] = "";
 	uint16_t commandLen = 0;
-	uint8_t ret = CODE_RETURN_ERROR;
+	RN4871_CODE_RETURN ret = CODE_RETURN_ERROR;
 
     if((COMMAND_MODE != dev->_currentMode) && (CMD_MODE_ENTER != cmd))
     {
@@ -129,12 +129,12 @@ uint8_t rn4871SendCmd(struct rn4871_dev_s *dev, enum rn4871_cmd_e cmd, const cha
 	return ret;
 }
 
-uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *response)
+RN4871_CODE_RETURN rn4871ResponseProcess(RN4871_DEV *dev, const char *response)
 {
     assert((NULL != dev) || (NULL != response));
 
-	uint8_t ret = CODE_RETURN_ERROR;
-    enum rn4871_cmd_e cmd = dev->_currentCmd;
+	RN4871_CODE_RETURN ret = CODE_RETURN_ERROR;
+    RN4871_CMD cmd = dev->_currentCmd;
 
     logger(LOG_DEBUG, "rn4871ResponseProcess: [%d] \"%s\"\r\n", strlen(response), response);
 
@@ -196,7 +196,7 @@ uint8_t rn4871ResponseProcess(struct rn4871_dev_s *dev, const char *response)
 	return ret;
 }
 
-uint8_t rn4871WaitReceivedData(struct rn4871_dev_s *dev, char *receivedData, uint16_t *receivedDataLen)
+RN4871_CODE_RETURN rn4871WaitReceivedData(RN4871_DEV *dev, char *receivedData, uint16_t *receivedDataLen)
 {
     assert(NULL != dev);
 
@@ -229,11 +229,11 @@ uint8_t rn4871WaitReceivedData(struct rn4871_dev_s *dev, char *receivedData, uin
     return CODE_RETURN_SUCCESS;
 }
 
-uint8_t rn4871EnterCommandMode(struct rn4871_dev_s *dev)
+RN4871_CODE_RETURN rn4871EnterCommandMode(RN4871_DEV *dev)
 {
     assert(NULL != dev);
 
-    uint8_t ret = CODE_RETURN_ERROR;
+    RN4871_CODE_RETURN ret = CODE_RETURN_ERROR;
     char response[RN4871_BUFFER_UART_LEN_MAX+1] = "";
     uint16_t responseSize = 0;
 
@@ -251,11 +251,11 @@ uint8_t rn4871EnterCommandMode(struct rn4871_dev_s *dev)
     return ret;
 }
 
-uint8_t rn4871QuitCommandMode(struct rn4871_dev_s *dev)
+RN4871_CODE_RETURN rn4871QuitCommandMode(RN4871_DEV *dev)
 {
     assert(NULL != dev);
 
-    uint8_t ret = CODE_RETURN_ERROR;
+    RN4871_CODE_RETURN ret = CODE_RETURN_ERROR;
     char response[RN4871_BUFFER_UART_LEN_MAX+1] = "";
     uint16_t responseSize = 0;
 
@@ -273,11 +273,11 @@ uint8_t rn4871QuitCommandMode(struct rn4871_dev_s *dev)
     return ret;
 }
 
-uint8_t rn4871RebootModule(struct rn4871_dev_s *dev)
+RN4871_CODE_RETURN rn4871RebootModule(RN4871_DEV *dev)
 {
     assert(NULL != dev);
 
-    uint8_t ret = CODE_RETURN_ERROR;
+    RN4871_CODE_RETURN ret = CODE_RETURN_ERROR;
     char response[RN4871_BUFFER_UART_LEN_MAX+1] = "";
     uint16_t responseSize = 0;
 
@@ -295,11 +295,11 @@ uint8_t rn4871RebootModule(struct rn4871_dev_s *dev)
     return ret;
 }
 
-uint8_t rn4871SetServices(struct rn4871_dev_s *dev, uint16_t service)
+RN4871_CODE_RETURN rn4871SetServices(RN4871_DEV *dev, uint16_t service)
 {
     assert(NULL != dev);
 
-    uint8_t ret = CODE_RETURN_ERROR;
+    RN4871_CODE_RETURN ret = CODE_RETURN_ERROR;
     char response[RN4871_BUFFER_UART_LEN_MAX+1] = "";
     uint16_t responseSize = 0;
 
@@ -317,11 +317,11 @@ uint8_t rn4871SetServices(struct rn4871_dev_s *dev, uint16_t service)
     return ret;
 }
 
-uint8_t rn4871SetDeviceName(struct rn4871_dev_s *dev, const char *deviceName)
+RN4871_CODE_RETURN rn4871SetDeviceName(RN4871_DEV *dev, const char *deviceName)
 {
     assert((NULL != dev) || (NULL != deviceName));
 
-    uint8_t ret = CODE_RETURN_ERROR;
+    RN4871_CODE_RETURN ret = CODE_RETURN_ERROR;
     char response[RN4871_BUFFER_UART_LEN_MAX+1] = "";
     uint16_t responseSize = 0;
 
@@ -346,11 +346,11 @@ uint8_t rn4871SetDeviceName(struct rn4871_dev_s *dev, const char *deviceName)
     return ret;
 }
 
-uint8_t rn4871SetConfig(struct rn4871_dev_s *dev, struct rn4871_conf_s *config)
+RN4871_CODE_RETURN rn4871SetConfig(RN4871_DEV *dev, struct rn4871_conf_s *config)
 {
     assert((NULL != dev) || (NULL != config));
 
-    uint8_t ret = CODE_RETURN_ERROR;
+    RN4871_CODE_RETURN ret = CODE_RETURN_ERROR;
     ret = rn4871SetDeviceName(dev, config->deviceName);
     if(CODE_RETURN_SUCCESS != ret)
     {
@@ -361,12 +361,12 @@ uint8_t rn4871SetConfig(struct rn4871_dev_s *dev, struct rn4871_conf_s *config)
     return ret;
 }
 
-uint8_t rn4871GetDeviceName(struct rn4871_dev_s *dev, char *deviceName, uint16_t deviceNameMaxLen)
+RN4871_CODE_RETURN rn4871GetDeviceName(RN4871_DEV *dev, char *deviceName, uint16_t deviceNameMaxLen)
 {
     assert((NULL != dev) || (NULL != deviceName));
 
     char infos[RN4871_BUFFER_UART_LEN_MAX+1] = "";
-    uint8_t ret = rn4871DumpInfos(dev, infos);
+    RN4871_CODE_RETURN ret = rn4871DumpInfos(dev, infos);
     if(CODE_RETURN_SUCCESS != ret)
     {
         return ret;
@@ -375,11 +375,11 @@ uint8_t rn4871GetDeviceName(struct rn4871_dev_s *dev, char *deviceName, uint16_t
     return ret;
 }
 
-uint8_t rn4871ParseFirmwareVersion(const char *firmwareVersion, char *result, uint16_t resultMaxLen)
+RN4871_CODE_RETURN rn4871ParseFirmwareVersion(const char *firmwareVersion, char *result, uint16_t resultMaxLen)
 {
     assert((NULL != firmwareVersion) || (NULL != result));
 
-    uint8_t ret = CODE_RETURN_ERROR;
+    RN4871_CODE_RETURN ret = CODE_RETURN_ERROR;
     char delimiter[] = " \r\n";
     char *token = strtok((char*)firmwareVersion, delimiter);
     do
@@ -399,11 +399,11 @@ uint8_t rn4871ParseFirmwareVersion(const char *firmwareVersion, char *result, ui
     return ret;
 }
 
-uint8_t rn4871GetFirmwareVersion(struct rn4871_dev_s *dev, char *firmwareVersion, uint16_t firmwareVersionMaxLen)
+RN4871_CODE_RETURN rn4871GetFirmwareVersion(RN4871_DEV *dev, char *firmwareVersion, uint16_t firmwareVersionMaxLen)
 {
     assert((NULL != dev) || (NULL != firmwareVersion));
 
-    uint8_t ret = CODE_RETURN_ERROR;
+    RN4871_CODE_RETURN ret = CODE_RETURN_ERROR;
     char response[RN4871_BUFFER_UART_LEN_MAX+1] = "";
     uint16_t responseSize = 0;
 
@@ -426,11 +426,11 @@ uint8_t rn4871GetFirmwareVersion(struct rn4871_dev_s *dev, char *firmwareVersion
     return ret;
 }
 
-uint8_t rn4871DumpInfos(struct rn4871_dev_s *dev, char *infos)
+RN4871_CODE_RETURN rn4871DumpInfos(RN4871_DEV *dev, char *infos)
 {
     assert((NULL != dev) || (NULL != infos));
 
-    uint8_t ret = CODE_RETURN_ERROR;
+    RN4871_CODE_RETURN ret = CODE_RETURN_ERROR;
     char response[RN4871_BUFFER_UART_LEN_MAX+1] = "";
     uint16_t responseSize = 0;
 
@@ -454,7 +454,7 @@ uint8_t rn4871DumpInfos(struct rn4871_dev_s *dev, char *infos)
     return ret;
 }
 
-uint8_t rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, char *result, uint16_t resultMaxLen)
+RN4871_CODE_RETURN rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, char *result, uint16_t resultMaxLen)
 {
     assert((NULL != infos) || (NULL != result));
 
@@ -485,12 +485,12 @@ uint8_t rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, c
     return CODE_RETURN_SUCCESS;
 }
 
-uint8_t rn4871GetMacAddress(struct rn4871_dev_s *dev, char *macAddress, uint16_t macAddressMaxLen)
+RN4871_CODE_RETURN rn4871GetMacAddress(RN4871_DEV *dev, char *macAddress, uint16_t macAddressMaxLen)
 {
     assert((NULL != dev) || (NULL != macAddress));
 
     char infos[RN4871_BUFFER_UART_LEN_MAX+1] = "";
-    uint8_t ret = rn4871DumpInfos(dev, infos);
+    RN4871_CODE_RETURN ret = rn4871DumpInfos(dev, infos);
     if(CODE_RETURN_SUCCESS != ret)
     {
         return ret;
@@ -499,12 +499,12 @@ uint8_t rn4871GetMacAddress(struct rn4871_dev_s *dev, char *macAddress, uint16_t
     return ret;
 }
 
-uint8_t rn4871GetServices(struct rn4871_dev_s *dev, uint16_t *services)
+RN4871_CODE_RETURN rn4871GetServices(RN4871_DEV *dev, uint16_t *services)
 {
     assert((NULL != dev) || (NULL != services));
 
     char infos[RN4871_BUFFER_UART_LEN_MAX+1] = "";
-    uint8_t ret = rn4871DumpInfos(dev, infos);
+    RN4871_CODE_RETURN ret = rn4871DumpInfos(dev, infos);
     if(CODE_RETURN_SUCCESS != ret)
     {
         return ret;
@@ -515,11 +515,11 @@ uint8_t rn4871GetServices(struct rn4871_dev_s *dev, uint16_t *services)
     return ret;
 }
 
-uint8_t rn4871EraseAllGattServices(struct rn4871_dev_s *dev)
+RN4871_CODE_RETURN rn4871EraseAllGattServices(RN4871_DEV *dev)
 {
     assert(NULL != dev);
 
-    uint8_t ret = CODE_RETURN_ERROR;
+    RN4871_CODE_RETURN ret = CODE_RETURN_ERROR;
     char response[RN4871_BUFFER_UART_LEN_MAX+1] = "";
     uint16_t responseSize = 0;
 
@@ -537,11 +537,11 @@ uint8_t rn4871EraseAllGattServices(struct rn4871_dev_s *dev)
     return ret;
 }
 
-uint8_t rn4871GetConfig(struct rn4871_dev_s *dev, struct rn4871_conf_s *config)
+RN4871_CODE_RETURN rn4871GetConfig(RN4871_DEV *dev, struct rn4871_conf_s *config)
 {
     assert((NULL != dev) || (NULL != config));
 
-    uint8_t ret = CODE_RETURN_ERROR;
+    RN4871_CODE_RETURN ret = CODE_RETURN_ERROR;
     char infos[RN4871_BUFFER_UART_LEN_MAX+1] = "";
     ret = rn4871DumpInfos(dev, infos);
     if(CODE_RETURN_SUCCESS != ret)
@@ -574,7 +574,7 @@ uint8_t rn4871GetConfig(struct rn4871_dev_s *dev, struct rn4871_conf_s *config)
     return ret;
 }
 
-uint8_t rn4871TransparentUartSendData(struct rn4871_dev_s *dev, const char *dataToSend, uint16_t dataToSendLen)
+RN4871_CODE_RETURN rn4871TransparentUartSendData(RN4871_DEV *dev, const char *dataToSend, uint16_t dataToSendLen)
 {
     assert((NULL != dev) || (NULL != dataToSend));
 
@@ -596,28 +596,28 @@ uint8_t rn4871TransparentUartSendData(struct rn4871_dev_s *dev, const char *data
     return dev->uartTx((char*)dataToSend, &dataToSendLen);
 }
 
-enum rn4871_fsm_e rn4871GetFsmState(struct rn4871_dev_s *dev)
+RN4871_FSM rn4871GetFsmState(RN4871_DEV *dev)
 {
     assert(NULL != dev);
     return dev->_fsmState;
 }
 
-void rn4871SetForceFsmState(struct rn4871_dev_s *dev, enum rn4871_fsm_e fsmForceState)
+void rn4871SetForceFsmState(RN4871_DEV *dev, RN4871_FSM fsmForceState)
 {
     assert(NULL != dev);
     dev->_fsmState = fsmForceState;
 }
 
-void rn4871SetForceDataMode(struct rn4871_dev_s *dev)
+void rn4871SetForceDataMode(RN4871_DEV *dev)
 {
     assert(NULL != dev);
     dev->_currentMode = DATA_MODE;
 }
 
-uint8_t rn4871IsOnTransparentUart(struct rn4871_dev_s *dev, bool *result)
+RN4871_CODE_RETURN rn4871IsOnTransparentUart(RN4871_DEV *dev, bool *result)
 {
     assert((NULL != dev) || (NULL != result));
-    uint8_t ret = CODE_RETURN_ERROR;
+    RN4871_CODE_RETURN ret = CODE_RETURN_ERROR;
 
     *result = false;
     uint16_t services = 0x00;
@@ -635,7 +635,7 @@ uint8_t rn4871IsOnTransparentUart(struct rn4871_dev_s *dev, bool *result)
     return CODE_RETURN_SUCCESS;
 }
 
-char* rn4871GetErrorCodeStr(enum rn4871_code_return_e errorCode)
+char* rn4871GetErrorCodeStr(RN4871_CODE_RETURN errorCode)
 {
     return ((char*) ERROR_CODE[errorCode]);
 }
