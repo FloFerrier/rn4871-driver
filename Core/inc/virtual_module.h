@@ -1,6 +1,10 @@
 #ifndef VIRTUAL_MODULE_H
 #define VIRTUAL_MODULE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -34,5 +38,9 @@ RN4871_CODE_RETURN virtualModuleConnect(VIRTUAL_MODULE *virtualModule, RN4871_DE
 RN4871_CODE_RETURN virtualModuleStream(VIRTUAL_MODULE *virtualModule, RN4871_DEV *dev);
 RN4871_CODE_RETURN virtualModuleDisconnect(VIRTUAL_MODULE *virtualModule, RN4871_DEV *dev);
 void virtualModuleSetForceDataMode(VIRTUAL_MODULE *virtualModule);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* VIRTUAL_MODULE_H */

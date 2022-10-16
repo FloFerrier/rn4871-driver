@@ -1,6 +1,10 @@
 #ifndef RN4871_DEFS_H
 #define RN4871_DEFS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 
 #define RN4871_BUFFER_UART_LEN_MAX (255)
@@ -110,5 +114,9 @@ typedef enum rn4871_service_e RN4871_SERVICE;
 typedef RN4871_CODE_RETURN (*rn4871_com_fptr_t)(char *buffer, uint16_t *bufferLen);
 
 typedef void (*rn4871_delay_fptr_t)(uint32_t delay);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* RN4871_DEFS_H */

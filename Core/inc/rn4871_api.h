@@ -1,6 +1,10 @@
 #ifndef RN4871_API_H
 #define RN4871_API_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -58,5 +62,9 @@ RN4871_CODE_RETURN rn4871GetConfig(RN4871_DEV *dev, RN4871_CONF *config);
 RN4871_CODE_RETURN rn4871IsOnTransparentUart(RN4871_DEV *dev, bool *result);
 RN4871_FSM rn4871GetFsmState(RN4871_DEV*dev);
 char* rn4871GetErrorCodeStr(RN4871_CODE_RETURN errorCode);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* RN4871_API_H */
