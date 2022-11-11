@@ -20,9 +20,9 @@ static RN4871_CMD getCommand(const char *command)
     {
         if(NULL != token)
         {
-            if(0 == strcmp(token, TABLE_COMMAND[i]))
+            if(0 == strcmp(token, TABLE_COMMAND_STR[i]))
             {
-                logger(LOG_DEBUG, "getCommand: find command %s\r\n", TABLE_COMMAND[i]);
+                logger(LOG_DEBUG, "getCommand: find command %s\r\n", TABLE_COMMAND_STR[i]);
                 return i;
             }
         }
@@ -168,7 +168,7 @@ void virtualModuleSendData(VIRTUAL_MODULE *virtualModule, char *dataToSend, uint
     logger(LOG_DEBUG, "virtualModuleSendData: [%d] \"%s\"\r\n", *dataToSendLen, dataToSend);
 }
 
-RN4871_CODE_RETURN virtualModuleConnect(VIRTUAL_MODULE *virtualModule, RN4871_DEV *dev)
+RN4871_CODE_RETURN virtualModuleConnect(VIRTUAL_MODULE *virtualModule, RN4871_MODULE *dev)
 {
     assert((NULL != virtualModule) || (NULL != dev));
 
@@ -178,7 +178,7 @@ RN4871_CODE_RETURN virtualModuleConnect(VIRTUAL_MODULE *virtualModule, RN4871_DE
     return result;
 }
 
-RN4871_CODE_RETURN virtualModuleStream(VIRTUAL_MODULE *virtualModule, RN4871_DEV *dev)
+RN4871_CODE_RETURN virtualModuleStream(VIRTUAL_MODULE *virtualModule, RN4871_MODULE *dev)
 {
     assert((NULL != virtualModule) || (NULL != dev));
 
@@ -188,7 +188,7 @@ RN4871_CODE_RETURN virtualModuleStream(VIRTUAL_MODULE *virtualModule, RN4871_DEV
     return result;
 }
 
-RN4871_CODE_RETURN virtualModuleDisconnect(VIRTUAL_MODULE *virtualModule, RN4871_DEV *dev)
+RN4871_CODE_RETURN virtualModuleDisconnect(VIRTUAL_MODULE *virtualModule, RN4871_MODULE *dev)
 {
     assert((NULL != virtualModule) || (NULL != dev));
 

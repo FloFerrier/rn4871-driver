@@ -4,6 +4,7 @@ include_directories(inc)
 
 set(SOURCE_FILES
 	src/rn4871_core.c
+	src/rn4871_defs.c
 	src/rn4871_logger.c
 	src/virtual_module.c
 )

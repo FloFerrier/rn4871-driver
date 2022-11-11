@@ -18,7 +18,7 @@ void mock_rn4871UartRxCb(char *buffer, RN4871_CODE_RETURN codeReturn)
     will_return(rn4871UartRxCb, codeReturn);
 }
 
-void mock_rn4871EnterCommandMode(RN4871_DEV *dev)
+void mock_rn4871EnterCommandMode(RN4871_MODULE *dev)
 {
     mock_rn4871UartTxCb("$", CODE_RETURN_SUCCESS);
     mock_rn4871UartTxCb("$", CODE_RETURN_SUCCESS);
@@ -27,7 +27,7 @@ void mock_rn4871EnterCommandMode(RN4871_DEV *dev)
     assert_int_equal(rn4871EnterCommandMode(dev), CODE_RETURN_SUCCESS);
 }
 
-void mock_rn4871WaitReceivedData(RN4871_DEV *dev, char *mockReceivedData)
+void mock_rn4871WaitReceivedData(RN4871_MODULE *dev, char *mockReceivedData)
 {
     char receivedData[BUFFER_SIZE_MAX] = "";
     uint16_t receivedDataLen = 0;
@@ -37,21 +37,21 @@ void mock_rn4871WaitReceivedData(RN4871_DEV *dev, char *mockReceivedData)
     assert_int_equal(receivedDataLen, strlen(mockReceivedData));
 }
 
-void mock_rn4871QuitCommandMode(RN4871_DEV *dev)
+void mock_rn4871QuitCommandMode(RN4871_MODULE *dev)
 {
     mock_rn4871UartTxCb("---\r\n", CODE_RETURN_SUCCESS);
     mock_rn4871UartRxCb("AOK\r\nCMD>", CODE_RETURN_SUCCESS);
     assert_int_equal(rn4871QuitCommandMode(dev), CODE_RETURN_SUCCESS);
 }
 
-void mock_rn4871RebootModule(RN4871_DEV *dev)
+void mock_rn4871RebootModule(RN4871_MODULE *dev)
 {
     mock_rn4871UartTxCb("R,1\r\n", CODE_RETURN_SUCCESS);
     mock_rn4871UartRxCb("AOK\r\nCMD>", CODE_RETURN_SUCCESS);
     assert_int_equal(rn4871RebootModule(dev), CODE_RETURN_SUCCESS);
 }
 
-void mock_rn4871IsOnTransparentUart(RN4871_DEV *dev)
+void mock_rn4871IsOnTransparentUart(RN4871_MODULE *dev)
 {
     bool result = false;
     mock_rn4871UartTxCb("D\r\n", CODE_RETURN_SUCCESS);

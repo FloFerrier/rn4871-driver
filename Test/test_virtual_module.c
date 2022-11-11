@@ -93,7 +93,7 @@ void test_virtualModuleSendData(void **state)
 
 void test_virtualModuleConnect(void **state)
 {
-    RN4871_DEV *dev = *state;
+    RN4871_MODULE *dev = *state;
     VIRTUAL_MODULE vm;
 
     mock_rn4871UartTxCb("\%CONNECT,0,AABBCCDDEEFF\%", CODE_RETURN_UART_FAIL);
@@ -105,7 +105,7 @@ void test_virtualModuleConnect(void **state)
 
 void test_virtualModuleStream(void **state)
 {
-    RN4871_DEV *dev = *state;
+    RN4871_MODULE *dev = *state;
     VIRTUAL_MODULE vm;
 
     mock_rn4871UartTxCb("\%STREAM_OPEN\%", CODE_RETURN_UART_FAIL);
@@ -117,7 +117,7 @@ void test_virtualModuleStream(void **state)
 
 void test_virtualModuleDisconnect(void **state)
 {
-    RN4871_DEV *dev = *state;
+    RN4871_MODULE *dev = *state;
     VIRTUAL_MODULE vm;
 
     mock_rn4871UartTxCb("\%DISCONNECT\%", CODE_RETURN_UART_FAIL);

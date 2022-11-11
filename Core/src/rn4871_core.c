@@ -5,7 +5,7 @@
 #define RN4871_DELAY_TO_RESPECT_MS 100
 #define BASE_HEXADECIMAL 16
 
-enum dump_infos_field_e
+typedef enum
 {
     FIELD_MAC_ADDRESS,
     FIELD_DEVICE_NAME,
@@ -13,7 +13,7 @@ enum dump_infos_field_e
     FIELD_AUTHENTIFICATION,
     FIELD_FEATURES,
     FIELD_SERVICES,
-};
+} RN4871_DUMP_INFOS_FIELD;
 
 static const char DUMP_INFOS_FIELD[][10] =
 {
@@ -25,12 +25,12 @@ static const char DUMP_INFOS_FIELD[][10] =
     "Services=",
 };
 
-static RN4871_CODE_RETURN rn4871SendCmd(RN4871_DEV *dev, RN4871_CMD cmd, const char *format, ...);
-static RN4871_CODE_RETURN rn4871ResponseProcess(RN4871_DEV *dev, const char *response);
-static RN4871_CODE_RETURN rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, char *result, uint16_t resultMaxLen);
+static RN4871_CODE_RETURN rn4871SendCmd(RN4871_MODULE *dev, RN4871_CMD cmd, const char *format, ...);
+static RN4871_CODE_RETURN rn4871ResponseProcess(RN4871_MODULE *dev, const char *response);
+static RN4871_CODE_RETURN rn4871ParseDumpInfos(const char *infos, RN4871_DUMP_INFOS_FIELD field, char *result, uint16_t resultMaxLen);
 static RN4871_CODE_RETURN rn4871ParseFirmwareVersion(const char *firmwareVersion, char *result, uint16_t resultMaxLen);
 
-RN4871_CODE_RETURN rn4871Init(RN4871_DEV *dev)
+RN4871_CODE_RETURN rn4871Init(RN4871_MODULE *dev)
 {
     assert(NULL != dev);
 
@@ -48,7 +48,7 @@ RN4871_CODE_RETURN rn4871Init(RN4871_DEV *dev)
     return CODE_RETURN_SUCCESS;
 }
 
-RN4871_CODE_RETURN rn4871SendCmd(RN4871_DEV *dev, RN4871_CMD cmd, const char *format, ...)
+RN4871_CODE_RETURN rn4871SendCmd(RN4871_MODULE *dev, RN4871_CMD cmd, const char *format, ...)
 {
     assert(NULL != dev);
 
@@ -92,7 +92,7 @@ RN4871_CODE_RETURN rn4871SendCmd(RN4871_DEV *dev, RN4871_CMD cmd, const char *fo
         case CMD_GET_VERSION :
         case CMD_CLEAR_ALL_SERVICES :
         {
-            commandLen = snprintf(command, RN4871_BUFFER_UART_LEN_MAX, "%s\r\n", TABLE_COMMAND[cmd]);
+            commandLen = snprintf(command, RN4871_BUFFER_UART_LEN_MAX, "%s\r\n", TABLE_COMMAND_STR[cmd]);
             ret = dev->uartTx(command, &commandLen);
             break;
         }
@@ -109,7 +109,7 @@ RN4871_CODE_RETURN rn4871SendCmd(RN4871_DEV *dev, RN4871_CMD cmd, const char *fo
         {
             char pArgs[RN4871_BUFFER_UART_LEN_MAX] = "";
             vsnprintf(pArgs, RN4871_BUFFER_UART_LEN_MAX, format, args);
-			commandLen = snprintf(command, RN4871_BUFFER_UART_LEN_MAX, "%s,%s\r\n", TABLE_COMMAND[cmd], pArgs);
+			commandLen = snprintf(command, RN4871_BUFFER_UART_LEN_MAX, "%s,%s\r\n", TABLE_COMMAND_STR[cmd], pArgs);
             ret = dev->uartTx(command, &commandLen);
 			break;
         }
@@ -129,7 +129,7 @@ RN4871_CODE_RETURN rn4871SendCmd(RN4871_DEV *dev, RN4871_CMD cmd, const char *fo
 	return ret;
 }
 
-RN4871_CODE_RETURN rn4871ResponseProcess(RN4871_DEV *dev, const char *response)
+RN4871_CODE_RETURN rn4871ResponseProcess(RN4871_MODULE *dev, const char *response)
 {
     assert((NULL != dev) || (NULL != response));
 
@@ -196,7 +196,7 @@ RN4871_CODE_RETURN rn4871ResponseProcess(RN4871_DEV *dev, const char *response)
 	return ret;
 }
 
-RN4871_CODE_RETURN rn4871WaitReceivedData(RN4871_DEV *dev, char *receivedData, uint16_t *receivedDataLen)
+RN4871_CODE_RETURN rn4871WaitReceivedData(RN4871_MODULE *dev, char *receivedData, uint16_t *receivedDataLen)
 {
     assert(NULL != dev);
 
@@ -229,7 +229,7 @@ RN4871_CODE_RETURN rn4871WaitReceivedData(RN4871_DEV *dev, char *receivedData, u
     return CODE_RETURN_SUCCESS;
 }
 
-RN4871_CODE_RETURN rn4871EnterCommandMode(RN4871_DEV *dev)
+RN4871_CODE_RETURN rn4871EnterCommandMode(RN4871_MODULE *dev)
 {
     assert(NULL != dev);
 
@@ -251,7 +251,7 @@ RN4871_CODE_RETURN rn4871EnterCommandMode(RN4871_DEV *dev)
     return ret;
 }
 
-RN4871_CODE_RETURN rn4871QuitCommandMode(RN4871_DEV *dev)
+RN4871_CODE_RETURN rn4871QuitCommandMode(RN4871_MODULE *dev)
 {
     assert(NULL != dev);
 
@@ -273,7 +273,7 @@ RN4871_CODE_RETURN rn4871QuitCommandMode(RN4871_DEV *dev)
     return ret;
 }
 
-RN4871_CODE_RETURN rn4871RebootModule(RN4871_DEV *dev)
+RN4871_CODE_RETURN rn4871RebootModule(RN4871_MODULE *dev)
 {
     assert(NULL != dev);
 
@@ -295,7 +295,7 @@ RN4871_CODE_RETURN rn4871RebootModule(RN4871_DEV *dev)
     return ret;
 }
 
-RN4871_CODE_RETURN rn4871SetServices(RN4871_DEV *dev, uint16_t service)
+RN4871_CODE_RETURN rn4871SetServices(RN4871_MODULE *dev, uint16_t service)
 {
     assert(NULL != dev);
 
@@ -317,7 +317,7 @@ RN4871_CODE_RETURN rn4871SetServices(RN4871_DEV *dev, uint16_t service)
     return ret;
 }
 
-RN4871_CODE_RETURN rn4871SetDeviceName(RN4871_DEV *dev, const char *deviceName)
+RN4871_CODE_RETURN rn4871SetDeviceName(RN4871_MODULE *dev, const char *deviceName)
 {
     assert((NULL != dev) || (NULL != deviceName));
 
@@ -346,7 +346,7 @@ RN4871_CODE_RETURN rn4871SetDeviceName(RN4871_DEV *dev, const char *deviceName)
     return ret;
 }
 
-RN4871_CODE_RETURN rn4871SetConfig(RN4871_DEV *dev, struct rn4871_conf_s *config)
+RN4871_CODE_RETURN rn4871SetConfig(RN4871_MODULE *dev, RN4871_CONFIG *config)
 {
     assert((NULL != dev) || (NULL != config));
 
@@ -361,7 +361,7 @@ RN4871_CODE_RETURN rn4871SetConfig(RN4871_DEV *dev, struct rn4871_conf_s *config
     return ret;
 }
 
-RN4871_CODE_RETURN rn4871GetDeviceName(RN4871_DEV *dev, char *deviceName, uint16_t deviceNameMaxLen)
+RN4871_CODE_RETURN rn4871GetDeviceName(RN4871_MODULE *dev, char *deviceName, uint16_t deviceNameMaxLen)
 {
     assert((NULL != dev) || (NULL != deviceName));
 
@@ -399,7 +399,7 @@ RN4871_CODE_RETURN rn4871ParseFirmwareVersion(const char *firmwareVersion, char 
     return ret;
 }
 
-RN4871_CODE_RETURN rn4871GetFirmwareVersion(RN4871_DEV *dev, char *firmwareVersion, uint16_t firmwareVersionMaxLen)
+RN4871_CODE_RETURN rn4871GetFirmwareVersion(RN4871_MODULE *dev, char *firmwareVersion, uint16_t firmwareVersionMaxLen)
 {
     assert((NULL != dev) || (NULL != firmwareVersion));
 
@@ -426,7 +426,7 @@ RN4871_CODE_RETURN rn4871GetFirmwareVersion(RN4871_DEV *dev, char *firmwareVersi
     return ret;
 }
 
-RN4871_CODE_RETURN rn4871DumpInfos(RN4871_DEV *dev, char *infos)
+RN4871_CODE_RETURN rn4871DumpInfos(RN4871_MODULE *dev, char *infos)
 {
     assert((NULL != dev) || (NULL != infos));
 
@@ -454,7 +454,7 @@ RN4871_CODE_RETURN rn4871DumpInfos(RN4871_DEV *dev, char *infos)
     return ret;
 }
 
-RN4871_CODE_RETURN rn4871ParseDumpInfos(const char *infos, enum dump_infos_field_e field, char *result, uint16_t resultMaxLen)
+RN4871_CODE_RETURN rn4871ParseDumpInfos(const char *infos, RN4871_DUMP_INFOS_FIELD field, char *result, uint16_t resultMaxLen)
 {
     assert((NULL != infos) || (NULL != result));
 
@@ -485,7 +485,7 @@ RN4871_CODE_RETURN rn4871ParseDumpInfos(const char *infos, enum dump_infos_field
     return CODE_RETURN_SUCCESS;
 }
 
-RN4871_CODE_RETURN rn4871GetMacAddress(RN4871_DEV *dev, char *macAddress, uint16_t macAddressMaxLen)
+RN4871_CODE_RETURN rn4871GetMacAddress(RN4871_MODULE *dev, char *macAddress, uint16_t macAddressMaxLen)
 {
     assert((NULL != dev) || (NULL != macAddress));
 
@@ -499,7 +499,7 @@ RN4871_CODE_RETURN rn4871GetMacAddress(RN4871_DEV *dev, char *macAddress, uint16
     return ret;
 }
 
-RN4871_CODE_RETURN rn4871GetServices(RN4871_DEV *dev, uint16_t *services)
+RN4871_CODE_RETURN rn4871GetServices(RN4871_MODULE *dev, uint16_t *services)
 {
     assert((NULL != dev) || (NULL != services));
 
@@ -515,7 +515,7 @@ RN4871_CODE_RETURN rn4871GetServices(RN4871_DEV *dev, uint16_t *services)
     return ret;
 }
 
-RN4871_CODE_RETURN rn4871EraseAllGattServices(RN4871_DEV *dev)
+RN4871_CODE_RETURN rn4871EraseAllGattServices(RN4871_MODULE *dev)
 {
     assert(NULL != dev);
 
@@ -537,7 +537,7 @@ RN4871_CODE_RETURN rn4871EraseAllGattServices(RN4871_DEV *dev)
     return ret;
 }
 
-RN4871_CODE_RETURN rn4871GetConfig(RN4871_DEV *dev, struct rn4871_conf_s *config)
+RN4871_CODE_RETURN rn4871GetConfig(RN4871_MODULE *dev, RN4871_CONFIG *config)
 {
     assert((NULL != dev) || (NULL != config));
 
@@ -574,7 +574,7 @@ RN4871_CODE_RETURN rn4871GetConfig(RN4871_DEV *dev, struct rn4871_conf_s *config
     return ret;
 }
 
-RN4871_CODE_RETURN rn4871TransparentUartSendData(RN4871_DEV *dev, const char *dataToSend, uint16_t dataToSendLen)
+RN4871_CODE_RETURN rn4871TransparentUartSendData(RN4871_MODULE *dev, const char *dataToSend, uint16_t dataToSendLen)
 {
     assert((NULL != dev) || (NULL != dataToSend));
 
@@ -596,25 +596,25 @@ RN4871_CODE_RETURN rn4871TransparentUartSendData(RN4871_DEV *dev, const char *da
     return dev->uartTx((char*)dataToSend, &dataToSendLen);
 }
 
-RN4871_FSM rn4871GetFsmState(RN4871_DEV *dev)
+RN4871_FSM rn4871GetFsmState(RN4871_MODULE *dev)
 {
     assert(NULL != dev);
     return dev->_fsmState;
 }
 
-void rn4871SetForceFsmState(RN4871_DEV *dev, RN4871_FSM fsmForceState)
+void rn4871SetForceFsmState(RN4871_MODULE *dev, RN4871_FSM fsmForceState)
 {
     assert(NULL != dev);
     dev->_fsmState = fsmForceState;
 }
 
-void rn4871SetForceDataMode(RN4871_DEV *dev)
+void rn4871SetForceDataMode(RN4871_MODULE *dev)
 {
     assert(NULL != dev);
     dev->_currentMode = DATA_MODE;
 }
 
-RN4871_CODE_RETURN rn4871IsOnTransparentUart(RN4871_DEV *dev, bool *result)
+RN4871_CODE_RETURN rn4871IsOnTransparentUart(RN4871_MODULE *dev, bool *result)
 {
     assert((NULL != dev) || (NULL != result));
     RN4871_CODE_RETURN ret = CODE_RETURN_ERROR;
@@ -637,5 +637,5 @@ RN4871_CODE_RETURN rn4871IsOnTransparentUart(RN4871_DEV *dev, bool *result)
 
 char* rn4871GetErrorCodeStr(RN4871_CODE_RETURN errorCode)
 {
-    return ((char*) ERROR_CODE[errorCode]);
+    return ((char*) ERROR_CODE_STR[errorCode]);
 }

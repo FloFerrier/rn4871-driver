@@ -34,9 +34,9 @@ typedef struct virtual_module_s VIRTUAL_MODULE;
 void virtualModuleInit(VIRTUAL_MODULE *virtualModule);
 void virtualModuleReceiveData(VIRTUAL_MODULE *virtualModule, const char *dataReceived);
 void virtualModuleSendData(VIRTUAL_MODULE*virtualModule, char *dataToSend, uint16_t *dataToSendLen);
-RN4871_CODE_RETURN virtualModuleConnect(VIRTUAL_MODULE *virtualModule, RN4871_DEV *dev);
-RN4871_CODE_RETURN virtualModuleStream(VIRTUAL_MODULE *virtualModule, RN4871_DEV *dev);
-RN4871_CODE_RETURN virtualModuleDisconnect(VIRTUAL_MODULE *virtualModule, RN4871_DEV *dev);
+RN4871_CODE_RETURN virtualModuleConnect(VIRTUAL_MODULE *virtualModule, RN4871_MODULE *dev);
+RN4871_CODE_RETURN virtualModuleStream(VIRTUAL_MODULE *virtualModule, RN4871_MODULE *dev);
+RN4871_CODE_RETURN virtualModuleDisconnect(VIRTUAL_MODULE *virtualModule, RN4871_MODULE *dev);
 void virtualModuleSetForceDataMode(VIRTUAL_MODULE *virtualModule);
 
 #ifdef __cplusplus

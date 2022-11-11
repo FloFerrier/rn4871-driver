@@ -35,7 +35,7 @@ void rn4871DelayMsCb(uint32_t delay)
 
 int setup(void **state)
 {
-    RN4871_DEV *dev = malloc(sizeof(RN4871_DEV));
+    RN4871_MODULE *dev = malloc(sizeof(RN4871_MODULE));
     dev->delayMs = rn4871DelayMsCb;
 	dev->uartRx = rn4871UartRxCb;
     dev->uartTx = rn4871UartTxCb;

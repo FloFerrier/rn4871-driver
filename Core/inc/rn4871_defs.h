@@ -15,7 +15,7 @@ extern "C" {
 #define ERROR_CODE_LEN_MAX (20)
 #define COMMAND_LEN_MAX (10)
 
-enum rn4871_code_return_e
+typedef enum
 {
 	CODE_RETURN_SUCCESS = 0,
 	CODE_RETURN_ERROR = 1,
@@ -26,22 +26,9 @@ enum rn4871_code_return_e
 	CODE_RETURN_NO_TRANSPARENT_UART = 6,
 	CODE_RETURN_NO_CONNECTED = 7,
 	CODE_RETURN_NO_STREAMING = 8,
-};
+} RN4871_CODE_RETURN;
 
-static const char ERROR_CODE[][ERROR_CODE_LEN_MAX] =
-{
-	"SUCCESS",
-	"ERROR",
-	"UART_FAIL",
-	"COMMAND_UNKNOWN",
-	"NO_COMMAND_MODE",
-	"NO_DATA_MODE",
-	"NO_TRANSPARENT_UART",
-	"NO_CONNECTED",
-	"NO_STREAMING",
-};
-
-enum rn4871_cmd_e
+typedef enum
 {
 	CMD_MODE_ENTER = 0, /* $$$ */
 	CMD_MODE_QUIT = 1, /* --- */
@@ -59,35 +46,15 @@ enum rn4871_cmd_e
 	CMD_SERVER_WRITE_CHARACTERISTIC = 13, /* SHW */
 	CMD_SERVER_READ_CHARACTERISTIC = 15, /* SHR */
 	CMD_NONE = 16,
-};
+} RN4871_CMD;
 
-static const char TABLE_COMMAND[][COMMAND_LEN_MAX] =
-{
-    "$$$",
-    "---",
-    "R",
-    "SF",
-    "S-",
-    "SN",
-    "GN",
-    "SS",
-    "D",
-    "V",
-    "PZ",
-    "PS",
-    "PC",
-    "SHW",
-    "SHR",
-    "",
-};
-
-enum rn4871_mode_e
+typedef enum
 {
     DATA_MODE,
     COMMAND_MODE,
-};
+} RN4871_MODE;
 
-enum rn4871_fsm_e
+typedef enum
 {
 	FSM_STATE_NONE,
 	FSM_STATE_INIT,
@@ -95,21 +62,18 @@ enum rn4871_fsm_e
 	FSM_STATE_CONNECTED,
 	FSM_STATE_STREAMING,
 	FSM_STATE_HALT,
-};
+} RN4871_FSM;
 
-enum rn4871_service_e
+typedef enum
 {
   	DEVICE_INFORMATION = 0x80,
   	UART_TRANSPARENT = 0x40,
   	BEACON = 0x20,
  	RESERVED = 0x10,
-};
+} RN4871_SERVICE;
 
-typedef enum rn4871_code_return_e RN4871_CODE_RETURN;
-typedef enum rn4871_cmd_e RN4871_CMD;
-typedef enum rn4871_mode_e RN4871_MODE;
-typedef enum rn4871_fsm_e RN4871_FSM;
-typedef enum rn4871_service_e RN4871_SERVICE;
+extern const char ERROR_CODE_STR[][ERROR_CODE_LEN_MAX];
+extern const char TABLE_COMMAND_STR[][COMMAND_LEN_MAX] ;
 
 typedef RN4871_CODE_RETURN (*rn4871_com_fptr_t)(char *buffer, uint16_t *bufferLen);
 

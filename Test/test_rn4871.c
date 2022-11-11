@@ -8,7 +8,7 @@
 
 void test_rn4871Init(void **state)
 {
-    RN4871_DEV *dev = malloc(sizeof(RN4871_DEV));
+    RN4871_MODULE *dev = malloc(sizeof(RN4871_MODULE));
 
     assert_int_equal(rn4871Init(dev), CODE_RETURN_ERROR);
 
@@ -25,7 +25,7 @@ void test_rn4871Init(void **state)
 
 void test_rn4871EnterCommandMode(void **state)
 {
-    RN4871_DEV *dev = *state;
+    RN4871_MODULE *dev = *state;
 
     mock_rn4871UartTxCb("$", CODE_RETURN_UART_FAIL);
     mock_rn4871UartTxCb("$", CODE_RETURN_UART_FAIL);
@@ -53,14 +53,14 @@ void test_rn4871EnterCommandMode(void **state)
 
 void test_rn4871WaitReceivedData(void **state)
 {
-    RN4871_DEV *dev = *state;
+    RN4871_MODULE *dev = *state;
     char receivedData[BUFFER_SIZE_MAX] = "";
     uint16_t receivedDataLen = 0;
 
     struct result_s 
     {
         char data[BUFFER_SIZE_MAX];
-        enum rn4871_code_return_e codeReturn;
+        RN4871_CODE_RETURN codeReturn;
     };
 
     struct result_s expectedResult[] =
@@ -89,7 +89,7 @@ void test_rn4871WaitReceivedData(void **state)
 
 void test_rn4871QuitCommandMode(void **state)
 {
-    RN4871_DEV *dev = *state;
+    RN4871_MODULE *dev = *state;
 
     assert_int_equal(rn4871QuitCommandMode(dev), CODE_RETURN_NO_COMMAND_MODE);
 
@@ -113,7 +113,7 @@ void test_rn4871QuitCommandMode(void **state)
 
 void test_rn4871RebootModule(void **state)
 {
-    RN4871_DEV *dev = *state;
+    RN4871_MODULE *dev = *state;
 
     assert_int_equal(rn4871RebootModule(dev), CODE_RETURN_NO_COMMAND_MODE);
 
@@ -137,7 +137,7 @@ void test_rn4871RebootModule(void **state)
 
 void test_rn4871SetServices(void **state)
 {
-    RN4871_DEV *dev = *state;
+    RN4871_MODULE *dev = *state;
 
     assert_int_equal(rn4871SetServices(dev, UART_TRANSPARENT | DEVICE_INFORMATION), CODE_RETURN_NO_COMMAND_MODE);
 
@@ -161,7 +161,7 @@ void test_rn4871SetServices(void **state)
 
 void test_rn4871SetDeviceName(void **state)
 {
-    RN4871_DEV *dev = *state;
+    RN4871_MODULE *dev = *state;
 
     char deviceName[] = "test_rn4871";
 
@@ -191,9 +191,12 @@ void test_rn4871SetDeviceName(void **state)
 
 void test_rn4871SetConfig(void **state)
 {
-    RN4871_DEV *dev = *state;
-    RN4871_CONF config =
-    { .deviceName = "RN4871-Test", .services = 0xC0};
+    RN4871_MODULE *dev = *state;
+    RN4871_CONFIG config =
+    {
+        .deviceName = "RN4871-Test",
+        .services = 0xC0
+    };
 
     assert_int_equal(rn4871SetConfig(dev, &config), CODE_RETURN_NO_COMMAND_MODE);
 
@@ -226,7 +229,7 @@ void test_rn4871SetConfig(void **state)
 
 void test_rn4871EraseAllGattServices(void **state)
 {
-    RN4871_DEV *dev = *state;
+    RN4871_MODULE *dev = *state;
     assert_int_equal(rn4871EraseAllGattServices(dev), CODE_RETURN_NO_COMMAND_MODE);
 
     mock_rn4871EnterCommandMode(dev);
@@ -249,7 +252,7 @@ void test_rn4871EraseAllGattServices(void **state)
 
 void test_rn4871GetServices(void **state)
 {
-    RN4871_DEV *dev = *state;
+    RN4871_MODULE *dev = *state;
     uint16_t services = 0xFF;
 
     assert_int_equal(rn4871GetServices(dev, &services), CODE_RETURN_NO_COMMAND_MODE);
@@ -284,7 +287,7 @@ void test_rn4871GetServices(void **state)
 
 void test_rn4871GetDeviceName(void **state)
 {
-    RN4871_DEV *dev = *state;
+    RN4871_MODULE *dev = *state;
     char deviceName[BUFFER_SIZE_MAX] = "";
 
     assert_int_equal(rn4871GetDeviceName(dev, deviceName, BUFFER_SIZE_MAX-1), CODE_RETURN_NO_COMMAND_MODE);
@@ -318,7 +321,7 @@ void test_rn4871GetDeviceName(void **state)
 
 void test_rn4871GetFirmwareVersion(void **state)
 {
-    RN4871_DEV *dev = *state;
+    RN4871_MODULE *dev = *state;
     char firmwareVersion[BUFFER_SIZE_MAX] = "";
 
     assert_int_equal(rn4871GetFirmwareVersion(dev, firmwareVersion, BUFFER_SIZE_MAX-1), CODE_RETURN_NO_COMMAND_MODE);
@@ -352,7 +355,7 @@ void test_rn4871GetFirmwareVersion(void **state)
 
 void test_rn4871DumpInfos(void **state)
 {
-    RN4871_DEV *dev = *state;
+    RN4871_MODULE *dev = *state;
     char infos[BUFFER_SIZE_MAX] = "";
 
     assert_int_equal(rn4871DumpInfos(dev, infos), CODE_RETURN_NO_COMMAND_MODE);
@@ -383,7 +386,7 @@ void test_rn4871DumpInfos(void **state)
 
 void test_rn4871GetMacAddress(void **state)
 {
-    RN4871_DEV *dev = *state;
+    RN4871_MODULE *dev = *state;
     char macAddress[BUFFER_SIZE_MAX] = "";
 
     assert_int_equal(rn4871GetMacAddress(dev, macAddress, BUFFER_SIZE_MAX-1), CODE_RETURN_NO_COMMAND_MODE);
@@ -417,9 +420,14 @@ void test_rn4871GetMacAddress(void **state)
 
 void test_rn4871GetConfig(void **state)
 {
-    RN4871_DEV *dev = *state;
-    RN4871_CONF config =
-    { .deviceName = "", .services = 0x00, .firmwareVersion="", .macAddress = ""};
+    RN4871_MODULE *dev = *state;
+    RN4871_CONFIG config =
+    {
+        .deviceName = "",
+        .services = 0x00,
+        .firmwareVersion="",
+        .macAddress = ""
+    };
 
     assert_int_equal(rn4871GetConfig(dev, &config), CODE_RETURN_NO_COMMAND_MODE);
 
@@ -466,7 +474,7 @@ void test_rn4871GetConfig(void **state)
 
 void test_rn4871IsOnTransparentUart(void **state)
 {
-    RN4871_DEV *dev = *state;
+    RN4871_MODULE *dev = *state;
     bool result = false;
 
     assert_int_equal(rn4871IsOnTransparentUart(dev, &result), CODE_RETURN_NO_COMMAND_MODE);
@@ -503,7 +511,7 @@ void test_rn4871IsOnTransparentUart(void **state)
 
 void test_rn4871TransparentUartSendData(void **state)
 {
-    RN4871_DEV *dev = *state;
+    RN4871_MODULE *dev = *state;
     char dataToSend[] = "Test data send by transparent UART";
     uint16_t dataToSendLen = (uint16_t) strlen(dataToSend);
 
@@ -526,7 +534,7 @@ void test_rn4871TransparentUartSendData(void **state)
 
 void test_rn4871GetFsmState(void **state)
 {
-    RN4871_DEV *dev = *state;
+    RN4871_MODULE *dev = *state;
 
     assert_int_equal(rn4871GetFsmState(dev), FSM_STATE_NONE);
 
@@ -549,7 +557,7 @@ void test_rn4871GetFsmState(void **state)
 
 void test_rn4871SetForceFsmState(void **state)
 {
-    RN4871_DEV *dev = *state;
+    RN4871_MODULE *dev = *state;
 
     rn4871SetForceFsmState(dev, FSM_STATE_NONE);
     assert_int_equal(rn4871GetFsmState(dev), FSM_STATE_NONE);
@@ -572,7 +580,7 @@ void test_rn4871SetForceFsmState(void **state)
 
 void test_rn4871SetForceDataMode(void **state)
 {
-    RN4871_DEV *dev = *state;
+    RN4871_MODULE *dev = *state;
 
     rn4871SetForceDataMode(dev);
     assert_int_equal(dev->_currentMode, DATA_MODE);
@@ -582,6 +590,6 @@ void test_rn4871GetErrorCodeStr(void **state)
 {
     for(int i= 0; i< 8; i++)
     {
-        assert_string_equal(rn4871GetErrorCodeStr((enum rn4871_code_return_e) i), ERROR_CODE[i]);
+        assert_string_equal(rn4871GetErrorCodeStr((RN4871_CODE_RETURN) i), ERROR_CODE_STR[i]);
     }
 }
