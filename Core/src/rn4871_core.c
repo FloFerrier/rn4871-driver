@@ -605,7 +605,21 @@ RN4871_FSM rn4871GetFsmState(RN4871_MODULE *dev)
 void rn4871SetForceFsmState(RN4871_MODULE *dev, RN4871_FSM fsmForceState)
 {
     assert(NULL != dev);
-    dev->_fsmState = fsmForceState;
+
+    switch (fsmForceState)
+    {
+        case FSM_STATE_INIT :
+	    case FSM_STATE_IDLE :
+	    case FSM_STATE_CONNECTED :
+	    case FSM_STATE_STREAMING :
+	    case FSM_STATE_HALT :
+            dev->_fsmState = fsmForceState;
+            break;
+
+        default:
+            dev->_fsmState = FSM_STATE_NONE;
+            break;
+    }
 }
 
 void rn4871SetForceDataMode(RN4871_MODULE *dev)
@@ -637,5 +651,23 @@ RN4871_CODE_RETURN rn4871IsOnTransparentUart(RN4871_MODULE *dev, bool *result)
 
 char* rn4871GetErrorCodeStr(RN4871_CODE_RETURN errorCode)
 {
-    return ((char*) ERROR_CODE_STR[errorCode]);
+    int id = UNKNOWN;
+    switch (errorCode)
+    {
+        case CODE_RETURN_SUCCESS :
+	    case CODE_RETURN_ERROR :
+	    case CODE_RETURN_UART_FAIL :
+	    case CODE_RETURN_CMD_UNKNOWN :
+	    case CODE_RETURN_NO_COMMAND_MODE :
+	    case CODE_RETURN_NO_DATA_MODE :
+	    case CODE_RETURN_NO_TRANSPARENT_UART :
+	    case CODE_RETURN_NO_CONNECTED :
+	    case CODE_RETURN_NO_STREAMING :
+            id = errorCode;
+            break;
+        default :
+            id = UNKNOWN;
+            break;
+    }
+    return ((char*) ERROR_CODE_STR[id]);
 }

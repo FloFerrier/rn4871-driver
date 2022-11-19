@@ -9,6 +9,9 @@ extern "C" {
 
 #define RN4871_BUFFER_UART_LEN_MAX (255)
 
+#define ERROR_CODE_NB_MAX (10)
+#define COMMAND_NB_MAX (16)
+
 #define DEVICE_NAME_LEN_MAX (20)
 #define MAC_ADDRESS_LEN_MAX (20)
 #define FW_VERSION_LEN_MAX (5)
@@ -26,6 +29,7 @@ typedef enum
 	CODE_RETURN_NO_TRANSPARENT_UART = 6,
 	CODE_RETURN_NO_CONNECTED = 7,
 	CODE_RETURN_NO_STREAMING = 8,
+	UNKNOWN = 9,
 } RN4871_CODE_RETURN;
 
 typedef enum
@@ -72,8 +76,8 @@ typedef enum
  	RESERVED = 0x10,
 } RN4871_SERVICE;
 
-extern const char ERROR_CODE_STR[][ERROR_CODE_LEN_MAX];
-extern const char TABLE_COMMAND_STR[][COMMAND_LEN_MAX] ;
+extern const char ERROR_CODE_STR[ERROR_CODE_NB_MAX][ERROR_CODE_LEN_MAX];
+extern const char TABLE_COMMAND_STR[COMMAND_NB_MAX][COMMAND_LEN_MAX] ;
 
 typedef RN4871_CODE_RETURN (*rn4871_com_fptr_t)(char *buffer, uint16_t *bufferLen);
 
