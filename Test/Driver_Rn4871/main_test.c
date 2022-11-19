@@ -4,7 +4,6 @@
 #include <stdio.h>
 
 #include "test_rn4871.h"
-#include "test_virtual_module.h"
 
 RN4871_CODE_RETURN rn4871UartTxCb(char *buf, uint16_t *len)
 {
@@ -76,15 +75,8 @@ int main()
         cmocka_unit_test_setup_teardown(test_rn4871GetFsmState, setup, teardown),
         cmocka_unit_test_setup_teardown(test_rn4871SetForceFsmState, setup, teardown),
         cmocka_unit_test_setup_teardown(test_rn4871SetForceDataMode, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_rn4871AlreadyOnCommandMode, setup, teardown),
         cmocka_unit_test(test_rn4871GetErrorCodeStr),
-
-        cmocka_unit_test(test_virtualModuleInit),
-        cmocka_unit_test(test_virtualModuleReceiveData),
-        cmocka_unit_test(test_virtualModuleSendData),
-        cmocka_unit_test_setup_teardown(test_virtualModuleConnect, setup, teardown),
-        cmocka_unit_test_setup_teardown(test_virtualModuleStream, setup, teardown),
-        cmocka_unit_test_setup_teardown(test_virtualModuleDisconnect, setup, teardown),
-        cmocka_unit_test(test_virtualModuleSetForceDataMode),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

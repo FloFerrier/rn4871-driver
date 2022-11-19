@@ -36,5 +36,6 @@ void test_rn4871GetFsmState(void **state);
 void test_rn4871SetForceFsmState(void **state);
 void test_rn4871SetForceDataMode(void **state);
 void test_rn4871GetErrorCodeStr(void **state);
+void test_rn4871AlreadyOnCommandMode(void **state);
 
 #endif /* TEST_RN4871_H */

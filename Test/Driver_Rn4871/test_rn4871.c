@@ -576,6 +576,10 @@ void test_rn4871SetForceFsmState(void **state)
 
     rn4871SetForceFsmState(dev, FSM_STATE_HALT);
     assert_int_equal(rn4871GetFsmState(dev), FSM_STATE_HALT);
+
+    /* Out of bounds */
+    rn4871SetForceFsmState(dev, 0xFF);
+    assert_int_equal(rn4871GetFsmState(dev), FSM_STATE_NONE);
 }
 
 void test_rn4871SetForceDataMode(void **state)
@@ -588,8 +592,47 @@ void test_rn4871SetForceDataMode(void **state)
 
 void test_rn4871GetErrorCodeStr(void **state)
 {
+    /* Get error on the table */
     for(int i= 0; i< 8; i++)
     {
         assert_string_equal(rn4871GetErrorCodeStr((RN4871_CODE_RETURN) i), ERROR_CODE_STR[i]);
     }
+    /* Out of bound */
+    assert_string_equal(rn4871GetErrorCodeStr(0xFF), "");
+}
+
+void test_rn4871AlreadyOnCommandMode(void **state)
+{
+    /* Module receives $$$ sequence but it is already on command mode,
+     *  so we need an enter character (CR+LF) to return a response.
+     */
+
+    RN4871_MODULE *dev = *state;
+
+    mock_rn4871UartTxCb("$", CODE_RETURN_SUCCESS);
+    mock_rn4871UartTxCb("$", CODE_RETURN_SUCCESS);
+    mock_rn4871UartTxCb("$", CODE_RETURN_SUCCESS);
+    mock_rn4871UartRxCb("", CODE_RETURN_SUCCESS);
+    assert_int_equal(rn4871EnterCommandMode(dev), CODE_RETURN_ERROR);
+
+    /* Workaround to start with module */
+    char enterAscii[] = "\r\n";
+    uint16_t enterAsciiLen = strlen(enterAscii);
+
+    char moduleResponse[BUFFER_SIZE_MAX] = "";
+    uint16_t moduleResponseLen = 0;
+
+    mock_rn4871UartTxCb(enterAscii, CODE_RETURN_SUCCESS);
+    dev->uartTx(enterAscii, &enterAsciiLen);
+
+    mock_rn4871UartRxCb("Err\r\nCMD> ", CODE_RETURN_SUCCESS);
+    dev->uartRx(moduleResponse, &moduleResponseLen);
+    dev->_currentMode = COMMAND_MODE;
+    dev->_currentCmd = CMD_MODE_ENTER;
+    dev->_fsmState = FSM_STATE_INIT;
+
+    mock_rn4871RebootModule(dev);
+    mock_rn4871WaitReceivedData(dev, "REBOOT");
+    assert_int_equal(rn4871GetFsmState(dev), FSM_STATE_IDLE);
+    assert_int_equal(dev->_currentMode , DATA_MODE);
 }
