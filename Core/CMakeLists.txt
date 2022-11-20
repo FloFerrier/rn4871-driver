@@ -13,4 +13,5 @@ add_library(${TARGET_LIB} STATIC ${SOURCE_FILES})
 
 if(${RN4871_UTEST})
 	target_compile_options(${TARGET_LIB} PRIVATE --coverage)
+	target_compile_definitions(${TARGET_LIB} PRIVATE -DRN4871_UTEST)
 endif()

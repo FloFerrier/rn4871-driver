@@ -174,7 +174,8 @@ RN4871_CODE_RETURN virtualModuleConnect(VIRTUAL_MODULE *virtualModule, RN4871_MO
 
     strncpy(virtualModule->_uartTx, "\%CONNECT,0,AABBCCDDEEFF\%", BUFFER_MAX_LEN);
     uint16_t bufferLen = strlen(virtualModule->_uartTx);
-    RN4871_CODE_RETURN result = dev->uartTx(virtualModule->_uartTx, &bufferLen);
+    RN4871_CODE_RETURN result = UNKNOWN;
+    result = dev->uartTx(virtualModule->_uartTx, &bufferLen);
     return result;
 }
 
@@ -184,7 +185,8 @@ RN4871_CODE_RETURN virtualModuleStream(VIRTUAL_MODULE *virtualModule, RN4871_MOD
 
     strncpy(virtualModule->_uartTx, "\%STREAM_OPEN\%", BUFFER_MAX_LEN);
     uint16_t bufferLen = strlen(virtualModule->_uartTx);
-    RN4871_CODE_RETURN result = dev->uartTx(virtualModule->_uartTx, &bufferLen);
+    RN4871_CODE_RETURN result = UNKNOWN;
+    result = dev->uartTx(virtualModule->_uartTx, &bufferLen);
     return result;
 }
 
@@ -194,7 +196,8 @@ RN4871_CODE_RETURN virtualModuleDisconnect(VIRTUAL_MODULE *virtualModule, RN4871
 
     strncpy(virtualModule->_uartTx, "\%DISCONNECT\%", BUFFER_MAX_LEN);
     uint16_t bufferLen = strlen(virtualModule->_uartTx);
-    RN4871_CODE_RETURN result = dev->uartTx(virtualModule->_uartTx, &bufferLen);
+    RN4871_CODE_RETURN result = UNKNOWN;
+    result = dev->uartTx(virtualModule->_uartTx, &bufferLen);
     return result;
 }
 

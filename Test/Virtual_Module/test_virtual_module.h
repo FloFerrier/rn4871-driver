@@ -9,12 +9,27 @@
 
 #include "virtual_module.h"
 
-void test_virtualModuleInit(void **state);
-void test_virtualModuleReceiveData(void **state);
-void test_virtualModuleSendData(void **state);
-void test_virtualModuleConnect(void **state);
-void test_virtualModuleStream(void **state);
-void test_virtualModuleDisconnect(void **state);
-void test_virtualModuleSetForceDataMode(void **state);
+void tryInitModule_Success(void **state);
+
+void receiveData_CmdEnter(void **state);
+void receiveData_CmdQuit(void **state);
+void receiveData_CmdIncorrect(void **state);
+void receiveData_CmdDumpInfos(void **state);
+void receiveData_CmdFirmwareVersion(void **state);
+void receiveData_CmdReboot(void **state);
+void receiveData_CmdResetFactory(void **state);
+void receiveData_CmdGetDeviceName(void **state);
+void receiveData_CmdSetDeviceName(void **state);
+void receiveData_CmdSetServices(void **state);
+void receiveData_AmountOfData(void **state);
+
+void sendData_EmptyString(void **state);
+void sendData_AmountOfData(void **state);
+
+void simulateBleExternal_Connection(void **state);
+void simulateBleExternal_Streaming(void **state);
+void simulateBleExternal_Disconnection(void **state);
+
+void setForceDataMode_Success(void **state);
 
 #endif /* TEST_VIRTUAL_MODULE_H */

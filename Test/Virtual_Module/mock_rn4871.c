@@ -3,6 +3,33 @@
 #include <stdbool.h>
 #include <string.h>
 
+RN4871_CODE_RETURN rn4871UartTxCb(char *buf, uint16_t *len)
+{
+    uint16_t size = *len;
+    check_expected(buf);
+    check_expected(size);
+    return mock_type(RN4871_CODE_RETURN);
+}
+
+RN4871_CODE_RETURN rn4871UartRxCb(char *buf, uint16_t *len)
+{
+	char *tmp;
+    tmp = mock_type(char*);
+    *len = (uint16_t) strlen(tmp);
+	memcpy(buf, tmp, *len);
+    return mock_type(RN4871_CODE_RETURN);
+}
+
+void rn4871LogSender(char *log, int len)
+{
+	printf("%s", log);
+}
+
+void rn4871DelayMsCb(uint32_t delay)
+{
+    // Nothing
+}
+
 void mock_rn4871UartTxCb(char *buffer, RN4871_CODE_RETURN codeReturn)
 {
     uint16_t len = strlen(buffer);

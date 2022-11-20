@@ -44,7 +44,6 @@ RN4871_CODE_RETURN rn4871TransparentUartSendData(RN4871_MODULE *dev, const char 
 /* Setter functions */
 RN4871_CODE_RETURN rn4871SetServices(RN4871_MODULE *dev, uint16_t service);
 RN4871_CODE_RETURN rn4871SetDeviceName(RN4871_MODULE *dev, const char *deviceName);
-RN4871_CODE_RETURN rn4871EraseAllGattServices(RN4871_MODULE *dev);
 RN4871_CODE_RETURN rn4871SetConfig(RN4871_MODULE *dev, RN4871_CONFIG *config);
 void rn4871SetForceFsmState(RN4871_MODULE *dev, RN4871_FSM fsmForceState);
 void rn4871SetForceDataMode(RN4871_MODULE *dev);

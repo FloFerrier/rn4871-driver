@@ -1,19 +1,12 @@
 #include "rn4871_defs.h"
 #include "rn4871_api.h"
+#include "rn4871_core.h"
 #include "rn4871_logger.h"
 
 #define RN4871_DELAY_TO_RESPECT_MS 100
 #define BASE_HEXADECIMAL 16
 
-typedef enum
-{
-    FIELD_MAC_ADDRESS,
-    FIELD_DEVICE_NAME,
-    FIELD_CONNECTION,
-    FIELD_AUTHENTIFICATION,
-    FIELD_FEATURES,
-    FIELD_SERVICES,
-} RN4871_DUMP_INFOS_FIELD;
+#define CR_LF_LEN_MAX 3
 
 static const char DUMP_INFOS_FIELD[][10] =
 {
@@ -25,10 +18,14 @@ static const char DUMP_INFOS_FIELD[][10] =
     "Services=",
 };
 
+static const char CR_LF[CR_LF_LEN_MAX] = "\r\n";
+
+#ifndef RN4871_UTEST
 static RN4871_CODE_RETURN rn4871SendCmd(RN4871_MODULE *dev, RN4871_CMD cmd, const char *format, ...);
 static RN4871_CODE_RETURN rn4871ResponseProcess(RN4871_MODULE *dev, const char *response);
 static RN4871_CODE_RETURN rn4871ParseDumpInfos(const char *infos, RN4871_DUMP_INFOS_FIELD field, char *result, uint16_t resultMaxLen);
 static RN4871_CODE_RETURN rn4871ParseFirmwareVersion(const char *firmwareVersion, char *result, uint16_t resultMaxLen);
+#endif
 
 RN4871_CODE_RETURN rn4871Init(RN4871_MODULE *dev)
 {
@@ -115,8 +112,11 @@ RN4871_CODE_RETURN rn4871SendCmd(RN4871_MODULE *dev, RN4871_CMD cmd, const char 
         }
         /* Unknown command */
         default :
+        {
 			ret = CODE_RETURN_CMD_UNKNOWN;
+            logger(LOG_ERROR, "rn4871SendCmd: CMD_UNKNOWN\r\n");
         	break;
+        }
     }
     dev->_currentCmd = cmd;
     if(NULL != format)
@@ -243,11 +243,24 @@ RN4871_CODE_RETURN rn4871EnterCommandMode(RN4871_MODULE *dev)
         return ret;
     }
     ret = dev->uartRx(response, &responseSize);
-    if(CODE_RETURN_SUCCESS != ret)
+    if(CODE_RETURN_SUCCESS == ret)
     {
-        return ret;
+        ret = rn4871ResponseProcess(dev, response);
     }
-    ret = rn4871ResponseProcess(dev, response);
+    else
+    {
+        /* Module may be already on command mode */
+        logger(LOG_DEBUG, "\"$$$\" without reponse => Send CR+LF\r\n");
+        uint16_t stringSize = CR_LF_LEN_MAX - 1;
+        ret = dev->uartTx((char*) CR_LF, &stringSize);
+        if(CODE_RETURN_SUCCESS != ret)
+        {
+            return ret;
+        }
+        ret = dev->uartRx(response, &responseSize);
+        dev->_fsmState = FSM_STATE_INIT;
+        dev->_currentMode = COMMAND_MODE;
+    }
     return ret;
 }
 
@@ -512,28 +525,6 @@ RN4871_CODE_RETURN rn4871GetServices(RN4871_MODULE *dev, uint16_t *services)
     char tmp[RN4871_BUFFER_UART_LEN_MAX+1] = "";
     ret = rn4871ParseDumpInfos(infos, FIELD_SERVICES, tmp, RN4871_BUFFER_UART_LEN_MAX);
     *services = (uint16_t)strtol(tmp, NULL, BASE_HEXADECIMAL);
-    return ret;
-}
-
-RN4871_CODE_RETURN rn4871EraseAllGattServices(RN4871_MODULE *dev)
-{
-    assert(NULL != dev);
-
-    RN4871_CODE_RETURN ret = CODE_RETURN_ERROR;
-    char response[RN4871_BUFFER_UART_LEN_MAX+1] = "";
-    uint16_t responseSize = 0;
-
-    ret = rn4871SendCmd(dev, CMD_CLEAR_ALL_SERVICES, NULL);
-    if(CODE_RETURN_SUCCESS != ret)
-    {
-        return ret;
-    }
-    ret = dev->uartRx(response, &responseSize);
-    if(CODE_RETURN_SUCCESS != ret)
-    {
-        return ret;
-    }
-    ret = rn4871ResponseProcess(dev, response);
     return ret;
 }
 
