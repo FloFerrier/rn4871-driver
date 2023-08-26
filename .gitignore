@@ -1,0 +1,4 @@
+# Ignore generated folder
+bin
+build_target
+build_test

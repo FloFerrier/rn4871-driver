@@ -5,7 +5,23 @@ RN4871 is a hardware module that supports **BLE** (Bluetooth Low Energy) and dis
 The module is designed to allow an easily interfacing with a device like a microcontroller via a **standard UART**. So, developers can used a module with a completely integrated Bluetooth software stack and add a wireless connectivity to their products.
 The module supports **GATT** (Generic ATTribute Profile), this acronym defines the way that two BLE devices transfer data. The data protocol uses concepts named **Services** and **Characteristics**. On this structure, the module contains a specific service for simulating an UART communication named **Transparent UART**.
 ## Getting Started
-Todo
+The project uses CMake as generator of toolchain.
+### Build source code as a library
+The RN4871 driver is designed to be compile as a c library and integrate on your embedded system.
+```bash
+mkdir build_target && cd build_target
+cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake --build . --target all
+```
+### Build and Run Test Suite
+The RN4871 driver contains standalone test suite to validate the running. CMocka is used as a test suite framework.
+```bash
+mkdir build_test && cd build_test
+cmake .. -DCMAKE_BUILD_TYPE=Test
+cmake --build . --target all
+ctest -V
+```
+All test binaries are stored on the bin folder.
 ## User guide
 ### Default UART settings
 The driver do not allow to change UART settings on the module.
