@@ -1,11 +1,11 @@
 #ifndef MOCK_RN4871_H
 #define MOCK_RN4871_H
 
+#include <cmocka.h>
+#include <setjmp.h>
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <setjmp.h>
-#include <cmocka.h>
 
 #include "rn4871_api.h"
 

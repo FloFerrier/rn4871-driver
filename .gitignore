@@ -2,3 +2,6 @@
 bin
 build_target
 build_test
+
+# Ignore IDE config files
+.vscode

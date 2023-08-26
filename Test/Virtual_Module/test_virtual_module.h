@@ -1,11 +1,11 @@
 #ifndef TEST_VIRTUAL_MODULE_H
 #define TEST_VIRTUAL_MODULE_H
 
+#include <cmocka.h>
+#include <setjmp.h>
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <setjmp.h>
-#include <cmocka.h>
 
 #include "virtual_module.h"
 
