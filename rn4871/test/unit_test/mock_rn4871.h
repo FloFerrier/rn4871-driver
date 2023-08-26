@@ -1,11 +1,13 @@
 #ifndef MOCK_RN4871_H
 #define MOCK_RN4871_H
 
-#include <cmocka.h>
+// clang-format off
 #include <setjmp.h>
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <cmocka.h>
+// clang-format on
 
 #include "rn4871_api.h"
 
