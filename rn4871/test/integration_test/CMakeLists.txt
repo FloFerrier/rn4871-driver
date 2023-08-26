@@ -1,4 +1,4 @@
-set(TARGET_NAME "rn4871_interface_test")
+set(TARGET_NAME "rn4871_integration_test")
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/rn4871/include
