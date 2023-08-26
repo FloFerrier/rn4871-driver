@@ -1,6 +1,5 @@
 #include "rn4871_core.h"
 
-#include "rn4871_api.h"
 #include "rn4871_defs.h"
 #include "rn4871_logger.h"
 

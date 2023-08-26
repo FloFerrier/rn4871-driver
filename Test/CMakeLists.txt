@@ -1,3 +1,0 @@
-add_subdirectory(Driver_Rn4871)
-add_subdirectory(Virtual_Module)
-add_subdirectory(Integration)

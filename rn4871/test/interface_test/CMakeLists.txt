@@ -1,11 +1,8 @@
-set(TARGET_NAME "Driver_Rn4871_Test")
-
-include_directories(${RN4871_CORE_INC})
+set(TARGET_NAME "rn4871_interface_test")
 
 add_executable(${TARGET_NAME}
     main_test.c
-    test_rn4871.c
-    mock_rn4871.c
+    test_integration.c
 )
 
 target_link_libraries(${TARGET_NAME} PRIVATE rn4871-driver)
