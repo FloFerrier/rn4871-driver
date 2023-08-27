@@ -5,19 +5,19 @@
 
 #include "test_rn4871.h"
 
-RN4871_CODE_RETURN rn4871UartTxCb(char *buf, uint16_t *len) {
+rn4871_error_e rn4871UartTxCb(char *buf, uint16_t *len) {
   uint16_t size = *len;
   check_expected(buf);
   check_expected(size);
-  return mock_type(RN4871_CODE_RETURN);
+  return mock_type(rn4871_error_e);
 }
 
-RN4871_CODE_RETURN rn4871UartRxCb(char *buf, uint16_t *len) {
+rn4871_error_e rn4871UartRxCb(char *buf, uint16_t *len) {
   char *tmp;
   tmp = mock_type(char *);
   *len = (uint16_t)strlen(tmp);
   memcpy(buf, tmp, *len);
-  return mock_type(RN4871_CODE_RETURN);
+  return mock_type(rn4871_error_e);
 }
 
 void rn4871LogSender(char *log, int len) { printf("%s", log); }
@@ -27,7 +27,7 @@ void rn4871DelayMsCb(uint32_t delay) {
 }
 
 int setup(void **state) {
-  RN4871_MODULE *module = malloc(sizeof(RN4871_MODULE));
+  rn4871_module_s *module = malloc(sizeof(rn4871_module_s));
   module->delayMs = rn4871DelayMsCb;
   module->uartRx = rn4871UartRxCb;
   module->uartTx = rn4871UartTxCb;
@@ -37,7 +37,7 @@ int setup(void **state) {
 }
 
 int teardown(void **state) {
-  RN4871_MODULE *module = *state;
+  rn4871_module_s *module = *state;
   free(module);
   return 0;
 }

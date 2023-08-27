@@ -3,22 +3,22 @@
 #include <stdio.h>
 #include <string.h>
 
-RN4871_CODE_RETURN rn4871UartTxCb(char *buf, uint16_t *len) {
+rn4871_error_e rn4871UartTxCb(char *buf, uint16_t *len) {
   assert((NULL != buf) || (NULL != len));
 
   if (0 < len) {
     // printf("[UART_TX] %s\r\n", buf);
   }
 
-  return CODE_RETURN_SUCCESS;
+  return RN4871_ERROR_NONE;
 }
 
-RN4871_CODE_RETURN rn4871UartRxCb(char *buf, uint16_t *len) {
+rn4871_error_e rn4871UartRxCb(char *buf, uint16_t *len) {
   assert((NULL != buf) || (NULL != len));
 
   // printf("[UART_RX] %s\r\n", buf);
 
-  return CODE_RETURN_SUCCESS;
+  return RN4871_ERROR_NONE;
 }
 
 void rn4871LogSender(char *log, int len) {

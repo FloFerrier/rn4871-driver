@@ -14,8 +14,8 @@
 
 #define BUFFER_SIZE_MAX 256
 
-RN4871_CODE_RETURN rn4871UartTxCb(char *buf, uint16_t *len);
-RN4871_CODE_RETURN rn4871UartRxCb(char *buf, uint16_t *len);
+rn4871_error_e rn4871UartTxCb(char *buf, uint16_t *len);
+rn4871_error_e rn4871UartRxCb(char *buf, uint16_t *len);
 void rn4871DelayMsCb(uint32_t delay);
 
 void tryInitModule_MissInterface(void **state);
