@@ -1,5 +1,6 @@
 #include "test_integration.h"
 
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 

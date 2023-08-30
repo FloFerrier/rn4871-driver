@@ -1,5 +1,11 @@
 #include "rn4871_core.h"
 
+#include <assert.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "rn4871_defs.h"
 #include "rn4871_logger.h"
 #include "rn4871_types.h"

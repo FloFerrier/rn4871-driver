@@ -5,15 +5,10 @@
 extern "C" {
 #endif
 
-#include <assert.h>
 #include <ctype.h>
-#include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 #define DEVICE_NAME_LEN_MAX (20)
 #define MAC_ADDRESS_LEN_MAX (20)
